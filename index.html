@@ -447,6 +447,7 @@ html, body {
 .board {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, minmax(0, 1fr));
   width: min(88vw, calc(100vh - 280px), 520px);
   aspect-ratio: 1;
   border-radius: 10px;
@@ -702,6 +703,86 @@ html, body {
 }
 
 /* ============================================================
+   ABBA CREDIT
+   ============================================================ */
+.abba-credit {
+  font-size: clamp(13px, 3vw, 16px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   PHASE 2 — ENEMY & CANDIDATE STYLING
+   ============================================================ */
+.piece.enemy-piece {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5))
+         drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.piece.enemy-main {
+  filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.7))
+         drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Enemy piece square glow (red instead of gold) */
+.square.enemy-square.light { background-color: #fca5a5; }
+.square.enemy-square.dark { background-color: #dc6060; }
+
+/* Candidate dots — show reachable squares for tap-safe-moves */
+.square.candidate::before {
+  content: '';
+  position: absolute;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.18);
+  pointer-events: none;
+  z-index: 1;
+}
+.square.candidate.dark::before {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Phase divider in level map */
+.phase-divider {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  padding: 16px 0 4px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.phase-divider:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 4px;
+}
+
+/* Piece value badge (shown on tap-best-capture levels) */
+.piece-value-badge {
+  position: absolute;
+  bottom: 1px;
+  right: 2px;
+  font-size: clamp(9px, 2.5vw, 13px);
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  border-radius: 6px;
+  padding: 0 4px;
+  line-height: 1.5;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 480px) {
@@ -749,6 +830,7 @@ html, body {
         <div class="player-stars-display" id="meitar-total-stars">⭐ 0</div>
       </button>
     </div>
+    <p class="abba-credit">Made by Abba, with love ❤️</p>
   </div>
 
   <!-- ============================================================
@@ -874,6 +956,10 @@ const PIECE_SYMBOLS = {
   K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟'
 };
 
+const PIECE_VALUES = {
+  P: 1, N: 3, B: 3, R: 5, Q: 9, K: 99
+};
+
 const LEVELS = [
   {
     id: 1,
@@ -936,6 +1022,103 @@ const LEVELS = [
     ],
     instruction: 'The queen combines rook + bishop! Find every square she controls.',
     theme: '#ec4899'
+  },
+
+  // =========== PHASE 2: Capture & Safety (Levels 7–12) ===========
+  {
+    id: 7,
+    name: 'Find the Capture',
+    type: 'tap-captures',
+    phase: 2,
+    piece: { type: 'N', square: 'e5' },
+    blockers: [
+      { square: 'c6', type: 'P' },
+      { square: 'd7', type: 'P' },
+      { square: 'g4', type: 'P' },
+      { square: 'f7', type: 'P' },
+      { square: 'b3', type: 'P' },
+      { square: 'h2', type: 'P' }
+    ],
+    instruction: 'The knight can capture enemy pieces! Tap every piece it can take 🗡️',
+    theme: '#ef4444'
+  },
+  {
+    id: 8,
+    name: 'Danger Zone',
+    type: 'tap-reachable',
+    phase: 2,
+    perspective: 'enemy',
+    piece: { type: 'R', square: 'e5' },
+    blockers: [
+      { square: 'e2', type: 'P' },
+      { square: 'b5', type: 'P' }
+    ],
+    instruction: '⚠️ Danger! Tap every square this enemy rook controls!',
+    theme: '#dc2626'
+  },
+  {
+    id: 9,
+    name: 'Safe Squares',
+    type: 'tap-safe-moves',
+    phase: 2,
+    piece: { type: 'K', square: 'd4' },
+    blockers: [
+      { square: 'h4', type: 'R' },
+      { square: 'e6', type: 'P' }
+    ],
+    instruction: 'Move the king — but only to safe squares! 🛡️',
+    theme: '#3b82f6'
+  },
+  {
+    id: 10,
+    name: 'Capture the Free Piece',
+    type: 'tap-undefended',
+    phase: 2,
+    piece: { type: 'N', square: 'e5' },
+    blockers: [
+      { square: 'c4', type: 'P' },
+      { square: 'f3', type: 'P' },
+      { square: 'g6', type: 'P' },
+      { square: 'd7', type: 'P' },
+      { square: 'b5', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    instruction: 'Capture only the undefended pieces! Protected pieces fight back ⚔️',
+    theme: '#f59e0b'
+  },
+  {
+    id: 11,
+    name: 'Think Ahead',
+    type: 'tap-undefended',
+    phase: 2,
+    piece: { type: 'N', square: 'd5' },
+    blockers: [
+      { square: 'b4', type: 'P' },
+      { square: 'c3', type: 'P' },
+      { square: 'b6', type: 'P' },
+      { square: 'f6', type: 'P' },
+      { square: 'e3', type: 'P' },
+      { square: 'a5', type: 'P' },
+      { square: 'e2', type: 'N' },
+      { square: 'g7', type: 'P' }
+    ],
+    instruction: 'Capture safely! Think one move ahead — will the enemy strike back? 🧠',
+    theme: '#8b5cf6'
+  },
+  {
+    id: 12,
+    name: 'Best Capture',
+    type: 'tap-best-capture',
+    phase: 2,
+    piece: { type: 'N', square: 'e5' },
+    blockers: [
+      { square: 'd3', type: 'P' },
+      { square: 'f3', type: 'P' },
+      { square: 'c4', type: 'B' },
+      { square: 'g6', type: 'R' }
+    ],
+    instruction: 'Which capture is worth the most? Tap the most valuable piece! 💎',
+    theme: '#059669'
   }
 ];
 
@@ -1053,6 +1236,120 @@ function getSlidingMoves(sq, occupied, directions) {
 
 
 /* =============================================================
+   PHASE 2 HELPERS — pawn attacks, enemy attack computation
+   ============================================================= */
+function getPawnAttacks(sq, color) {
+  const { file, rank } = toCoords(sq);
+  const dir = color === 'white' ? 1 : -1;
+  const attacks = [];
+  if (isOnBoard(file - 1, rank + dir)) attacks.push(toSquare(file - 1, rank + dir));
+  if (isOnBoard(file + 1, rank + dir)) attacks.push(toSquare(file + 1, rank + dir));
+  return attacks;
+}
+
+// Get all moves for a piece given an occupied map (for attack/defense calculation)
+function getMovesForPiece(type, square, occupied) {
+  switch (type) {
+    case 'N': return getKnightMoves(square, occupied);
+    case 'K': return getKingMoves(square, occupied);
+    case 'R': return getSlidingMoves(square, occupied, [[0,1],[0,-1],[1,0],[-1,0]]);
+    case 'B': return getSlidingMoves(square, occupied, [[1,1],[1,-1],[-1,1],[-1,-1]]);
+    case 'Q': return getSlidingMoves(square, occupied, [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]);
+    case 'P': return getPawnAttacks(square, 'black');
+    default: return [];
+  }
+}
+
+// Compute all squares attacked by a set of enemy pieces
+function getEnemyAttackedSquares(enemies, mainPieceSquare) {
+  const attacked = new Set();
+  for (const enemy of enemies) {
+    // Build occupied: all pieces except this enemy are obstacles
+    const occupied = {};
+    occupied[mainPieceSquare] = 'friendly';
+    for (const e of enemies) {
+      if (e.square !== enemy.square) occupied[e.square] = 'friendly';
+    }
+    const moves = getMovesForPiece(enemy.type, enemy.square, occupied);
+    for (const sq of moves) attacked.add(sq);
+  }
+  return attacked;
+}
+
+// Check if a square is defended by any piece in the list
+// (after removing the piece at targetSquare — it's been captured)
+function isSquareDefended(targetSquare, defenders, allPiecesOnBoard) {
+  for (const def of defenders) {
+    if (def.square === targetSquare) continue; // can't defend yourself
+    // Build occupied: everything except captured piece and the defender
+    const occupied = {};
+    for (const p of allPiecesOnBoard) {
+      if (p.square === targetSquare) continue; // captured, removed
+      if (p.square === def.square) continue;   // the defender itself
+      occupied[p.square] = 'friendly';         // everything else blocks
+    }
+    const moves = getMovesForPiece(def.type, def.square, occupied);
+    if (moves.includes(targetSquare)) return true;
+  }
+  return false;
+}
+
+// Master dispatcher: compute correct squares based on level type
+function computeCorrectSquares(level) {
+  const type = level.type || 'tap-reachable';
+  const reachable = getReachableSquares(level);
+
+  switch (type) {
+    case 'tap-reachable':
+      return reachable;
+
+    case 'tap-captures': {
+      // Correct = enemy squares that the player's piece can reach
+      return reachable.filter(sq =>
+        level.blockers.some(b => b.square === sq)
+      );
+    }
+
+    case 'tap-safe-moves': {
+      // Correct = reachable squares NOT attacked by any enemy
+      const enemyAttacked = getEnemyAttackedSquares(level.blockers, level.piece.square);
+      return reachable.filter(sq => !enemyAttacked.has(sq));
+    }
+
+    case 'tap-undefended': {
+      // Correct = capturable enemies that are NOT defended by other enemies
+      const capturable = reachable.filter(sq =>
+        level.blockers.some(b => b.square === sq)
+      );
+      const allPieces = [{ square: level.piece.square, type: level.piece.type }]
+        .concat(level.blockers);
+      return capturable.filter(sq => {
+        const otherEnemies = level.blockers.filter(b => b.square !== sq);
+        return !isSquareDefended(sq, otherEnemies, allPieces);
+      });
+    }
+
+    case 'tap-best-capture': {
+      // Correct = the single most valuable capturable enemy
+      const capturable = reachable.filter(sq =>
+        level.blockers.some(b => b.square === sq)
+      );
+      let bestValue = 0, bestSquare = null;
+      for (const sq of capturable) {
+        const enemy = level.blockers.find(b => b.square === sq);
+        const val = PIECE_VALUES[enemy.type] || 0;
+        if (val > bestValue) { bestValue = val; bestSquare = sq; }
+      }
+      return bestSquare ? [bestSquare] : [];
+    }
+
+    default:
+      return reachable;
+  }
+}
+
+
+/* =============================================================
    STORAGE — localStorage persistence
    ============================================================= */
 const STORAGE_KEY = 'meitaray-chess';
@@ -1145,6 +1442,19 @@ function renderLevelGrid() {
   grid.innerHTML = '';
 
   LEVELS.forEach(level => {
+    // Add phase dividers
+    if (level.id === 1) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '♟ Piece Mastery';
+      grid.appendChild(div);
+    } else if (level.id === 7) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '⚔️ Capture & Safety';
+      grid.appendChild(div);
+    }
+
     const stars = gameData[currentPlayer].stars[level.id - 1];
     const unlocked = isLevelUnlocked(level.id, currentPlayer);
     const completed = stars > 0;
@@ -1192,8 +1502,8 @@ function startLevel(levelId) {
   currentLevelId = levelId;
   const level = LEVELS[levelId - 1];
 
-  // Compute correct answers
-  correctSquares = getReachableSquares(level);
+  // Compute correct answers based on level type
+  correctSquares = computeCorrectSquares(level);
   foundSquares = [];
   mistakes = 0;
   gameActive = true;
@@ -1237,15 +1547,28 @@ function renderBoard(level) {
 
       // Mark the main piece's square
       if (sq === level.piece.square) {
-        div.classList.add('piece-square');
+        div.classList.add(level.perspective === 'enemy' ? 'enemy-square' : 'piece-square');
       }
 
       // Add piece if present
       if (pieceMap[sq]) {
         const span = document.createElement('span');
-        span.className = 'piece ' + (pieceMap[sq].isMain ? 'main-piece' : 'blocker-piece');
+        const isPhase2 = level.phase === 2;
+        if (pieceMap[sq].isMain) {
+          span.className = 'piece ' + (level.perspective === 'enemy' ? 'enemy-main' : 'main-piece');
+        } else {
+          span.className = 'piece ' + (isPhase2 ? 'enemy-piece' : 'blocker-piece');
+        }
         span.textContent = PIECE_SYMBOLS[pieceMap[sq].type];
         div.appendChild(span);
+
+        // Show piece value badges on tap-best-capture levels
+        if ((level.type === 'tap-best-capture') && !pieceMap[sq].isMain) {
+          const badge = document.createElement('span');
+          badge.className = 'piece-value-badge';
+          badge.textContent = PIECE_VALUES[pieceMap[sq].type];
+          div.appendChild(badge);
+        }
       }
 
       // Click/tap handler
@@ -1257,6 +1580,15 @@ function renderBoard(level) {
 
   // Render coordinate labels
   renderCoordinateLabels();
+
+  // Phase 2: show candidate dots for tap-safe-moves (so kids know which squares to consider)
+  if (level.type === 'tap-safe-moves') {
+    const allReachable = getReachableSquares(level);
+    for (const sq of allReachable) {
+      const el = document.querySelector(`.square[data-square="${sq}"]`);
+      if (el) el.classList.add('candidate');
+    }
+  }
 }
 
 function renderCoordinateLabels() {
@@ -1308,12 +1640,24 @@ function handleSquareTap(sq, el) {
   if (!gameActive) return;
 
   const level = LEVELS[currentLevelId - 1];
+  const type = level.type || 'tap-reachable';
 
   // Ignore taps on the main piece's square
   if (sq === level.piece.square) return;
 
   // Ignore already-found squares
   if (foundSquares.includes(sq)) return;
+
+  // Phase 2: filter irrelevant taps so kids don't get penalized for tapping empty squares
+  const captureTypes = ['tap-captures', 'tap-undefended', 'tap-safe-captures', 'tap-best-capture'];
+  if (captureTypes.includes(type) && !correctSquares.includes(sq)) {
+    const hasEnemy = level.blockers.some(b => b.square === sq);
+    if (!hasEnemy) return; // ignore empty square taps — only enemy piece taps count
+  }
+  if (type === 'tap-safe-moves' && !correctSquares.includes(sq)) {
+    const reachable = getReachableSquares(level);
+    if (!reachable.includes(sq)) return; // ignore non-reachable squares
+  }
 
   // Check if this square is a correct answer
   if (correctSquares.includes(sq)) {
@@ -1322,8 +1666,8 @@ function handleSquareTap(sq, el) {
     el.classList.add('correct');
     sfxCorrect();
 
-    // If this square had a blocker piece, fade it out (captured!)
-    const pieceEl = el.querySelector('.blocker-piece');
+    // If this square had a blocker/enemy piece, fade it out (captured!)
+    const pieceEl = el.querySelector('.blocker-piece, .enemy-piece');
     if (pieceEl) {
       pieceEl.style.transition = 'opacity 0.3s';
       pieceEl.style.opacity = '0';
