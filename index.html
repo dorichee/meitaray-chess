@@ -1238,6 +1238,128 @@ const LEVELS = [
     ],
     instruction: 'Time to think like a tactician! Look at where the enemies are, picture the knight\'s L-shaped jumps, and find the magic square that attacks TWO pieces at once. In real games, forks win you free pieces — they\'re one of the most powerful tricks in chess! 🍴🧠',
     theme: '#059669'
+  },
+
+  // =========== PHASE 3b: Tactics — Pins (Levels 21–24) ===========
+  {
+    id: 21,
+    name: 'Pinned!',
+    type: 'tap-pinned',
+    phase: 3,
+    piece: { type: 'B', square: 'a4' },
+    blockers: [
+      { square: 'c6', type: 'N' },
+      { square: 'd7', type: 'K' },
+      { square: 'g2', type: 'P' },
+      { square: 'h8', type: 'R' }
+    ],
+    instruction: 'A pin traps a piece on a line! Your bishop is staring down a diagonal — one enemy piece is stuck because the KING is right behind it. If it moves, the king is exposed! Tap the pinned piece 📌',
+    theme: '#dc2626'
+  },
+  {
+    id: 22,
+    name: 'Rook Pin',
+    type: 'tap-pinned',
+    phase: 3,
+    piece: { type: 'R', square: 'a5' },
+    blockers: [
+      { square: 'd5', type: 'N' },
+      { square: 'g5', type: 'K' },
+      { square: 'a2', type: 'P' },
+      { square: 'c8', type: 'B' }
+    ],
+    instruction: 'Rooks pin along straight lines! Your rook is aiming across the 5th rank. Which enemy piece is stuck in the middle — unable to move without leaving the king in danger? 📌',
+    theme: '#2563eb'
+  },
+  {
+    id: 23,
+    name: 'Queen Pin',
+    type: 'tap-pinned',
+    phase: 3,
+    piece: { type: 'Q', square: 'h1' },
+    blockers: [
+      { square: 'e4', type: 'N' },
+      { square: 'c6', type: 'K' },
+      { square: 'h5', type: 'P' },
+      { square: 'a1', type: 'R' }
+    ],
+    instruction: 'The queen can pin along ANY line — ranks, files, AND diagonals! She\'s pinning one enemy piece to the king. The other enemies are just distractions. Which piece is truly stuck? 📌',
+    theme: '#7c3aed'
+  },
+  {
+    id: 24,
+    name: 'Double Pin!',
+    type: 'tap-pinned',
+    phase: 3,
+    piece: { type: 'Q', square: 'd1' },
+    blockers: [
+      { square: 'd5', type: 'N' },
+      { square: 'd8', type: 'K' },
+      { square: 'f3', type: 'P' },
+      { square: 'h5', type: 'R' },
+      { square: 'a4', type: 'B' }
+    ],
+    instruction: 'The queen is SO powerful she can create TWO pins at once! One pin goes through the file to the king (absolute pin). Another goes diagonally to a valuable piece behind (relative pin). Find BOTH pinned pieces! 📌📌',
+    theme: '#b91c1c'
+  },
+
+  // =========== PHASE 3c: Tactics — Skewers (Levels 25–28) ===========
+  {
+    id: 25,
+    name: 'The Skewer!',
+    type: 'tap-skewer-square',
+    phase: 3,
+    piece: { type: 'R', square: 'h1' },
+    blockers: [
+      { square: 'd5', type: 'K' },
+      { square: 'd8', type: 'P' },
+      { square: 'h6', type: 'B' }
+    ],
+    instruction: 'A skewer is like a REVERSE pin! You attack a valuable piece, it HAS to move, and then you capture the weaker piece hiding behind it. Move your rook to the right square on the d-file to skewer the king to the pawn! 🗡️',
+    theme: '#0891b2'
+  },
+  {
+    id: 26,
+    name: 'Bishop Skewer',
+    type: 'tap-skewer-square',
+    phase: 3,
+    piece: { type: 'B', square: 'f1' },
+    blockers: [
+      { square: 'd5', type: 'K' },
+      { square: 'b7', type: 'R' },
+      { square: 'e2', type: 'P' },
+      { square: 'h3', type: 'N' }
+    ],
+    instruction: 'Bishops skewer along diagonals! Find the square where your bishop looks through the king to the rook behind it. The king must escape, and the rook is yours! 🗡️',
+    theme: '#059669'
+  },
+  {
+    id: 27,
+    name: 'Queen Skewer',
+    type: 'tap-skewer-square',
+    phase: 3,
+    piece: { type: 'Q', square: 'e1' },
+    blockers: [
+      { square: 'b5', type: 'K' },
+      { square: 'b8', type: 'P' },
+      { square: 'e7', type: 'N' }
+    ],
+    instruction: 'The queen can skewer along files, ranks, AND diagonals — so many options! Find the square that puts the king and pawn on the same line, with the king in front. The king flees, the pawn falls! 🗡️👑',
+    theme: '#d97706'
+  },
+  {
+    id: 28,
+    name: 'Royal Skewer',
+    type: 'tap-skewer-square',
+    phase: 3,
+    piece: { type: 'R', square: 'a8' },
+    blockers: [
+      { square: 'd5', type: 'K' },
+      { square: 'd2', type: 'Q' },
+      { square: 'g8', type: 'B' }
+    ],
+    instruction: 'The ultimate skewer — king in front, QUEEN behind! Your rook needs to get on the d-file above the king. When the king runs, the queen is yours. That\'s a game-winning move! 🗡️💰',
+    theme: '#be123c'
   }
 ];
 
@@ -1484,6 +1606,98 @@ function computeCorrectSquares(level) {
       return forkSquares;
     }
 
+    case 'tap-pinned': {
+      // Correct = enemy pieces that are pinned by our sliding piece
+      // A piece is pinned when it's between our attacker and a MORE valuable piece on the same line
+      const pinnedSquares = [];
+      const { file: mainF, rank: mainR } = toCoords(level.piece.square);
+
+      // Get sliding directions based on piece type
+      let pinDirs = [];
+      if (['R', 'Q'].includes(level.piece.type)) {
+        pinDirs.push([0,1],[0,-1],[1,0],[-1,0]);
+      }
+      if (['B', 'Q'].includes(level.piece.type)) {
+        pinDirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
+      }
+
+      for (const [df, dr] of pinDirs) {
+        let f = mainF + df, r = mainR + dr;
+        let firstEnemy = null;
+
+        while (isOnBoard(f, r)) {
+          const sq = toSquare(f, r);
+          const blocker = level.blockers.find(b => b.square === sq);
+
+          if (blocker) {
+            if (!firstEnemy) {
+              firstEnemy = blocker;
+            } else {
+              // Second piece on this line — check if first is pinned to second
+              if (PIECE_VALUES[blocker.type] > PIECE_VALUES[firstEnemy.type]) {
+                pinnedSquares.push(firstEnemy.square);
+              }
+              break; // stop scanning this direction
+            }
+          }
+          f += df;
+          r += dr;
+        }
+      }
+      return pinnedSquares;
+    }
+
+    case 'tap-skewer-square': {
+      // Correct = squares where our piece can move to create a skewer
+      // A skewer: from candidate square, scan lines — first enemy is MORE valuable than second
+      const skewerSquares = [];
+
+      // Get sliding directions for this piece type
+      let skDirs = [];
+      if (['R', 'Q'].includes(level.piece.type)) {
+        skDirs.push([0,1],[0,-1],[1,0],[-1,0]);
+      }
+      if (['B', 'Q'].includes(level.piece.type)) {
+        skDirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
+      }
+
+      for (const sq of reachable) {
+        // Remove any captured piece on that square
+        const remainingEnemies = level.blockers.filter(b => b.square !== sq);
+        const { file: cf, rank: cr } = toCoords(sq);
+
+        for (const [df, dr] of skDirs) {
+          let f = cf + df, r = cr + dr;
+          let firstEnemy = null;
+          let foundSkewer = false;
+
+          while (isOnBoard(f, r)) {
+            const s = toSquare(f, r);
+            const enemy = remainingEnemies.find(b => b.square === s);
+
+            if (enemy) {
+              if (!firstEnemy) {
+                firstEnemy = enemy;
+              } else {
+                // Second enemy — skewer if first is more valuable
+                if (PIECE_VALUES[firstEnemy.type] > PIECE_VALUES[enemy.type]) {
+                  foundSkewer = true;
+                }
+                break;
+              }
+            }
+            f += df;
+            r += dr;
+          }
+          if (foundSkewer) {
+            skewerSquares.push(sq);
+            break; // one skewer line is enough for this square
+          }
+        }
+      }
+      return skewerSquares;
+    }
+
     default:
       return reachable;
   }
@@ -1597,7 +1811,12 @@ function renderLevelGrid() {
     } else if (level.id === 17) {
       const div = document.createElement('div');
       div.className = 'phase-divider';
-      div.textContent = '🍴 Tactics';
+      div.textContent = '🍴 Forks';
+      grid.appendChild(div);
+    } else if (level.id === 21) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '📌 Pins & Skewers';
       grid.appendChild(div);
     }
 
@@ -1731,7 +1950,7 @@ function renderBoard(level) {
   renderCoordinateLabels();
 
   // Show candidate dots for levels where kids pick among reachable squares
-  if (level.type === 'tap-safe-moves' || level.type === 'tap-fork') {
+  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square'].includes(level.type)) {
     const allReachable = getReachableSquares(level);
     for (const sq of allReachable) {
       const el = document.querySelector(`.square[data-square="${sq}"]`);
@@ -1797,13 +2016,13 @@ function handleSquareTap(sq, el) {
   // Ignore already-found squares
   if (foundSquares.includes(sq)) return;
 
-  // Phase 2: filter irrelevant taps so kids don't get penalized for tapping empty squares
-  const captureTypes = ['tap-captures', 'tap-undefended', 'tap-safe-captures', 'tap-best-capture'];
+  // Filter irrelevant taps so kids don't get penalized for tapping empty squares
+  const captureTypes = ['tap-captures', 'tap-undefended', 'tap-safe-captures', 'tap-best-capture', 'tap-pinned'];
   if (captureTypes.includes(type) && !correctSquares.includes(sq)) {
     const hasEnemy = level.blockers.some(b => b.square === sq);
     if (!hasEnemy) return; // ignore empty square taps — only enemy piece taps count
   }
-  if ((type === 'tap-safe-moves' || type === 'tap-fork') && !correctSquares.includes(sq)) {
+  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square'].includes(type) && !correctSquares.includes(sq)) {
     const reachable = getReachableSquares(level);
     if (!reachable.includes(sq)) return; // ignore non-reachable squares
   }

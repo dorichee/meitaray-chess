@@ -1,7 +1,7 @@
 // MeitaRay Chess — Service Worker
 // Caches the app for offline play on iPads
 
-const CACHE_NAME = 'meitaray-chess-v4';
+const CACHE_NAME = 'meitaray-chess-v5';
 
 const ASSETS = [
   './',
