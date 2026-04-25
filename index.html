@@ -956,6 +956,10 @@ const PIECE_SYMBOLS = {
   K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟'
 };
 
+// White pieces = player, Black pieces = enemies
+const WHITE_PIECES = { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' };
+const BLACK_PIECES = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' };
+
 const PIECE_VALUES = {
   P: 1, N: 3, B: 3, R: 5, Q: 9, K: 99
 };
@@ -1119,6 +1123,121 @@ const LEVELS = [
     ],
     instruction: 'Which capture is worth the most? Tap the most valuable piece! 💎',
     theme: '#059669'
+  },
+
+  // =========== PHASE 2b: Advanced Capture & Safety (Levels 13–16) ===========
+  {
+    id: 13,
+    name: 'Rook Sweep',
+    type: 'tap-captures',
+    phase: 2,
+    piece: { type: 'R', square: 'd1' },
+    blockers: [
+      { square: 'd5', type: 'N' },
+      { square: 'g1', type: 'P' },
+      { square: 'a1', type: 'P' },
+      { square: 'd8', type: 'B' }
+    ],
+    instruction: 'The rook slides along lines! Tap every piece it can capture.',
+    theme: '#ef4444'
+  },
+  {
+    id: 14,
+    name: 'Bishop Sniper',
+    type: 'tap-captures',
+    phase: 2,
+    piece: { type: 'B', square: 'd4' },
+    blockers: [
+      { square: 'f6', type: 'P' },
+      { square: 'g7', type: 'N' },
+      { square: 'b2', type: 'P' },
+      { square: 'a1', type: 'R' },
+      { square: 'b6', type: 'P' }
+    ],
+    instruction: 'The bishop strikes diagonally! Watch for pieces blocking the way.',
+    theme: '#10b981'
+  },
+  {
+    id: 15,
+    name: 'Double Threat',
+    type: 'tap-safe-moves',
+    phase: 2,
+    piece: { type: 'K', square: 'e4' },
+    blockers: [
+      { square: 'a8', type: 'B' },
+      { square: 'e8', type: 'R' }
+    ],
+    instruction: 'Two enemies watching! Find the safe squares for the king 🛡️',
+    theme: '#3b82f6'
+  },
+  {
+    id: 16,
+    name: "Queen's Pick",
+    type: 'tap-best-capture',
+    phase: 2,
+    piece: { type: 'Q', square: 'd1' },
+    blockers: [
+      { square: 'd4', type: 'P' },
+      { square: 'a4', type: 'N' },
+      { square: 'h5', type: 'R' }
+    ],
+    instruction: 'The queen can reach many pieces. Capture the most valuable one! 💎',
+    theme: '#ec4899'
+  },
+
+  // =========== PHASE 3: Tactics — Forks (Levels 17–20) ===========
+  {
+    id: 17,
+    name: 'The Fork!',
+    type: 'tap-fork',
+    phase: 3,
+    piece: { type: 'N', square: 'e2' },
+    blockers: [
+      { square: 'b5', type: 'Q' },
+      { square: 'd5', type: 'R' }
+    ],
+    instruction: 'Find the square where the knight attacks TWO pieces at once! 🍴',
+    theme: '#f59e0b'
+  },
+  {
+    id: 18,
+    name: 'Royal Fork',
+    type: 'tap-fork',
+    phase: 3,
+    piece: { type: 'N', square: 'e6' },
+    blockers: [
+      { square: 'e8', type: 'K' },
+      { square: 'a8', type: 'R' },
+      { square: 'd4', type: 'P' }
+    ],
+    instruction: 'Fork the king AND the rook! Find that perfect square 🍴👑',
+    theme: '#dc2626'
+  },
+  {
+    id: 19,
+    name: 'Knight Trap',
+    type: 'tap-fork',
+    phase: 3,
+    piece: { type: 'N', square: 'e5' },
+    blockers: [
+      { square: 'h8', type: 'K' },
+      { square: 'd6', type: 'Q' }
+    ],
+    instruction: 'The knight can attack the king AND queen! Find the fork! 🍴',
+    theme: '#8b5cf6'
+  },
+  {
+    id: 20,
+    name: 'Double Strike',
+    type: 'tap-fork',
+    phase: 3,
+    piece: { type: 'N', square: 'e4' },
+    blockers: [
+      { square: 'b5', type: 'B' },
+      { square: 'e8', type: 'R' }
+    ],
+    instruction: 'One move, two targets! Where does the knight land? 🍴',
+    theme: '#059669'
   }
 ];
 
@@ -1261,12 +1380,14 @@ function getMovesForPiece(type, square, occupied) {
 }
 
 // Compute all squares attacked by a set of enemy pieces
-function getEnemyAttackedSquares(enemies, mainPieceSquare) {
+// excludeMainPiece: if true, the main piece does NOT block enemy sight lines
+//   (used for tap-safe-moves — the king is leaving its square)
+function getEnemyAttackedSquares(enemies, mainPieceSquare, excludeMainPiece) {
   const attacked = new Set();
   for (const enemy of enemies) {
     // Build occupied: all pieces except this enemy are obstacles
     const occupied = {};
-    occupied[mainPieceSquare] = 'friendly';
+    if (!excludeMainPiece) occupied[mainPieceSquare] = 'friendly';
     for (const e of enemies) {
       if (e.square !== enemy.square) occupied[e.square] = 'friendly';
     }
@@ -1312,7 +1433,8 @@ function computeCorrectSquares(level) {
 
     case 'tap-safe-moves': {
       // Correct = reachable squares NOT attacked by any enemy
-      const enemyAttacked = getEnemyAttackedSquares(level.blockers, level.piece.square);
+      // excludeMainPiece=true: the piece is LEAVING its square, so it doesn't block enemy lines
+      const enemyAttacked = getEnemyAttackedSquares(level.blockers, level.piece.square, true);
       return reachable.filter(sq => !enemyAttacked.has(sq));
     }
 
@@ -1341,6 +1463,25 @@ function computeCorrectSquares(level) {
         if (val > bestValue) { bestValue = val; bestSquare = sq; }
       }
       return bestSquare ? [bestSquare] : [];
+    }
+
+    case 'tap-fork': {
+      // Correct = squares where the piece can move to attack 2+ enemy pieces at once
+      const forkSquares = [];
+      for (const sq of reachable) {
+        // Simulate piece on sq — compute what it attacks from there
+        const occupied = {};
+        for (const b of level.blockers) {
+          if (b.square === sq) continue; // captured piece removed
+          occupied[b.square] = 'enemy';
+        }
+        const attacks = getMovesForPiece(level.piece.type, sq, occupied);
+        const enemiesHit = level.blockers.filter(b =>
+          b.square !== sq && attacks.includes(b.square)
+        );
+        if (enemiesHit.length >= 2) forkSquares.push(sq);
+      }
+      return forkSquares;
     }
 
     default:
@@ -1453,6 +1594,11 @@ function renderLevelGrid() {
       div.className = 'phase-divider';
       div.textContent = '⚔️ Capture & Safety';
       grid.appendChild(div);
+    } else if (level.id === 17) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '🍴 Tactics';
+      grid.appendChild(div);
     }
 
     const stars = gameData[currentPlayer].stars[level.id - 1];
@@ -1481,7 +1627,7 @@ function renderLevelGrid() {
 
     card.innerHTML = `
       <div class="level-number">${level.id}</div>
-      <div class="level-piece-icon">${PIECE_SYMBOLS[level.piece.type]}</div>
+      <div class="level-piece-icon">${(level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[level.piece.type]}</div>
       <div class="level-name">${level.name}</div>
       <div class="level-stars">${starsHTML}</div>
     `;
@@ -1553,13 +1699,16 @@ function renderBoard(level) {
       // Add piece if present
       if (pieceMap[sq]) {
         const span = document.createElement('span');
-        const isPhase2 = level.phase === 2;
+        const isPhase2Plus = level.phase >= 2;
         if (pieceMap[sq].isMain) {
           span.className = 'piece ' + (level.perspective === 'enemy' ? 'enemy-main' : 'main-piece');
+          // Enemy perspective: main piece is black; otherwise white
+          span.textContent = (level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[pieceMap[sq].type];
         } else {
-          span.className = 'piece ' + (isPhase2 ? 'enemy-piece' : 'blocker-piece');
+          span.className = 'piece ' + (isPhase2Plus ? 'enemy-piece' : 'blocker-piece');
+          // Blockers/enemies are always black; except in enemy perspective where they're white (player's pieces blocking)
+          span.textContent = (level.perspective === 'enemy' ? WHITE_PIECES : BLACK_PIECES)[pieceMap[sq].type];
         }
-        span.textContent = PIECE_SYMBOLS[pieceMap[sq].type];
         div.appendChild(span);
 
         // Show piece value badges on tap-best-capture levels
@@ -1581,8 +1730,8 @@ function renderBoard(level) {
   // Render coordinate labels
   renderCoordinateLabels();
 
-  // Phase 2: show candidate dots for tap-safe-moves (so kids know which squares to consider)
-  if (level.type === 'tap-safe-moves') {
+  // Show candidate dots for levels where kids pick among reachable squares
+  if (level.type === 'tap-safe-moves' || level.type === 'tap-fork') {
     const allReachable = getReachableSquares(level);
     for (const sq of allReachable) {
       const el = document.querySelector(`.square[data-square="${sq}"]`);
@@ -1654,7 +1803,7 @@ function handleSquareTap(sq, el) {
     const hasEnemy = level.blockers.some(b => b.square === sq);
     if (!hasEnemy) return; // ignore empty square taps — only enemy piece taps count
   }
-  if (type === 'tap-safe-moves' && !correctSquares.includes(sq)) {
+  if ((type === 'tap-safe-moves' || type === 'tap-fork') && !correctSquares.includes(sq)) {
     const reachable = getReachableSquares(level);
     if (!reachable.includes(sq)) return; // ignore non-reachable squares
   }
