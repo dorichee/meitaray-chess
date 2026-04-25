@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Chess">
+  <meta name="theme-color" content="#1e1b4b">
+  <title>MeitaRay Chess</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+/* ============================================================
+   APP CONTAINER & SCREEN SYSTEM
+   ============================================================ */
+#app {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================================
+   PLAYER SELECT SCREEN
+   ============================================================ */
+#screen-select {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 30px;
+  overflow: hidden;
+}
+
+/* Floating chess symbols background */
+#screen-select::before {
+  content: '♔ ♕ ♖ ♗ ♘ ♙ ♚ ♛ ♜ ♝ ♞ ♟';
+  position: absolute;
+  inset: 0;
+  font-size: 80px;
+  color: rgba(255,255,255,0.03);
+  word-spacing: 40px;
+  line-height: 1.8;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-title {
+  font-size: clamp(32px, 8vw, 56px);
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 1;
+}
+.app-title .crown { font-size: 0.8em; }
+
+.app-subtitle {
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  margin-top: -10px;
+  z-index: 1;
+}
+
+.player-cards {
+  display: flex;
+  gap: 24px;
+  z-index: 1;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.player-card {
+  width: 220px;
+  padding: 36px 24px 28px;
+  border-radius: 28px;
+  border: 3px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+  color: #fff;
+  animation: card-breathe 4s ease-in-out infinite;
+}
+.player-card:nth-child(2) { animation-delay: 2s; }
+
+.player-card:active {
+  transform: scale(0.93) !important;
+  animation: none;
+}
+
+.player-card.ray {
+  background: linear-gradient(145deg, #f472b6, #ec4899, #db2777);
+  box-shadow: 0 10px 40px rgba(236, 72, 153, 0.4);
+}
+.player-card.meitar {
+  background: linear-gradient(145deg, #38bdf8, #0ea5e9, #0284c7);
+  box-shadow: 0 10px 40px rgba(14, 165, 233, 0.4);
+}
+
+.player-icon {
+  font-size: 72px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.player-name {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.player-stars-display {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+@keyframes card-breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.03) translateY(-4px); }
+}
+
+/* ============================================================
+   LEVEL MAP SCREEN
+   ============================================================ */
+#screen-map {
+  background: linear-gradient(180deg, #0f0a2e 0%, #1e1b4b 50%, #312e81 100%);
+  padding: env(safe-area-inset-top, 20px) 20px 20px 20px;
+}
+
+.map-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.btn-back {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 22px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:active { background: rgba(255,255,255,0.2); }
+
+.map-title {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.total-stars {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fbbf24;
+  white-space: nowrap;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 8px 0 40px;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.level-card {
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s;
+  font-family: inherit;
+  color: #fff;
+  position: relative;
+}
+.level-card:active { transform: scale(0.95); }
+
+.level-card.unlocked {
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+}
+
+.level-card.current {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.08);
+  animation: level-pulse 2s ease-in-out infinite;
+}
+
+.level-card.locked {
+  opacity: 0.4;
+  cursor: default;
+}
+.level-card.locked:active { transform: none; }
+
+.level-card.completed {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.level-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+.level-card.completed .level-number {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
+.level-piece-icon {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.level-name {
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.level-stars {
+  display: flex;
+  gap: 4px;
+  font-size: 18px;
+}
+.level-stars .star-filled { color: #fbbf24; }
+.level-stars .star-empty { color: rgba(255,255,255,0.15); }
+
+.level-lock {
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+@keyframes level-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.15); }
+}
+
+/* ============================================================
+   GAME SCREEN
+   ============================================================ */
+#screen-game {
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+  padding: env(safe-area-inset-top, 16px) 16px 20px 16px;
+  align-items: center;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 8px 0;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.game-header .btn-back {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.1);
+  color: #78716c;
+}
+.game-header .btn-back:active { background: rgba(0,0,0,0.12); }
+
+.game-info {
+  flex: 1;
+  text-align: center;
+}
+
+.game-level-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #292524;
+}
+
+.game-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.progress-dots {
+  display: flex;
+  gap: 5px;
+}
+.progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.1);
+  transition: background 0.3s, transform 0.3s;
+}
+.progress-dot.found {
+  background: #4ade80;
+  transform: scale(1.15);
+}
+
+.progress-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #78716c;
+  min-width: 40px;
+}
+
+.btn-hint {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.1);
+  background: rgba(251, 191, 36, 0.15);
+  font-size: 20px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+.btn-hint:active {
+  transform: scale(0.9);
+  background: rgba(251, 191, 36, 0.3);
+}
+
+/* ============================================================
+   CHESS BOARD
+   ============================================================ */
+.board-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.board-wrapper {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.rank-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 2px 0;
+}
+.rank-labels span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a8a29e;
+  text-align: center;
+  width: 16px;
+}
+
+.board-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.file-labels {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 2px;
+}
+.file-labels span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a8a29e;
+  text-align: center;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(88vw, calc(100vh - 280px), 520px);
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 30px rgba(0,0,0,0.12),
+    0 2px 8px rgba(0,0,0,0.08),
+    inset 0 0 0 2px rgba(139, 115, 85, 0.3);
+  border: 3px solid #8b7355;
+}
+
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.15s;
+}
+.square.light { background-color: #f0d9b5; }
+.square.dark { background-color: #b58863; }
+
+/* Piece display */
+.piece {
+  font-size: clamp(24px, 9vw, 52px);
+  line-height: 1;
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+}
+.piece.main-piece {
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6))
+         drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+.piece.blocker-piece {
+  opacity: 0.8;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+}
+
+/* Square states */
+.square.correct {
+  background-color: #86efac !important;
+  animation: correct-pop 0.3s ease;
+}
+.square.correct::after {
+  content: '✓';
+  position: absolute;
+  font-size: clamp(12px, 3.5vw, 20px);
+  font-weight: 700;
+  color: rgba(22, 101, 52, 0.5);
+  bottom: 2px;
+  right: 4px;
+  pointer-events: none;
+}
+
+.square.wrong {
+  animation: wrong-shake 0.4s ease;
+}
+.square.wrong.light { background-color: #fca5a5 !important; }
+.square.wrong.dark { background-color: #e88080 !important; }
+
+.square.hint-glow {
+  animation: hint-pulse 0.6s ease-in-out 3;
+}
+.square.hint-glow.light {
+  background-color: #fde68a !important;
+}
+.square.hint-glow.dark {
+  background-color: #d4a843 !important;
+}
+
+/* Main piece golden glow on its square */
+.square.piece-square.light { background-color: #fde68a; }
+.square.piece-square.dark { background-color: #d4a843; }
+
+@keyframes correct-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrong-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+}
+
+@keyframes hint-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 3px rgba(251, 191, 36, 0.2); }
+  50% { box-shadow: inset 0 0 0 4px rgba(251, 191, 36, 0.7); }
+}
+
+/* ============================================================
+   GAME INSTRUCTION
+   ============================================================ */
+.game-instruction {
+  font-size: clamp(14px, 3.5vw, 18px);
+  font-weight: 500;
+  color: #78716c;
+  text-align: center;
+  padding: 8px 16px;
+  max-width: 400px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   LEVEL COMPLETE OVERLAY
+   ============================================================ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.complete-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px 32px 32px;
+  text-align: center;
+  max-width: 340px;
+  width: 100%;
+  transform: scale(0.8);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.overlay.visible .complete-card {
+  transform: scale(1);
+}
+
+.complete-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #292524;
+  margin-bottom: 20px;
+}
+
+.complete-stars {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.complete-star {
+  font-size: 48px;
+  opacity: 0;
+  transform: scale(0);
+}
+.complete-star.earned {
+  color: #fbbf24;
+  filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.4));
+}
+.complete-star.empty {
+  color: #d1d5db;
+}
+.complete-star.animate {
+  animation: star-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.complete-star:nth-child(1).animate { animation-delay: 0.3s; }
+.complete-star:nth-child(2).animate { animation-delay: 0.6s; }
+.complete-star:nth-child(3).animate { animation-delay: 0.9s; }
+
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.complete-msg {
+  font-size: 16px;
+  font-weight: 500;
+  color: #78716c;
+  margin-bottom: 28px;
+}
+
+.complete-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 14px 28px;
+  border-radius: 16px;
+  border: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.btn:active { transform: scale(0.93); }
+
+.btn-replay {
+  background: #f1f5f9;
+  color: #475569;
+}
+.btn-next {
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+}
+.btn-map-return {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(109, 40, 217, 0.3);
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+#confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  overflow: hidden;
+}
+.confetti-particle {
+  position: absolute;
+  top: -20px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  80% { opacity: 1; }
+  100% {
+    transform: translateY(105vh) rotate(720deg) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  .player-card { width: 160px; padding: 24px 16px 20px; }
+  .player-icon { font-size: 52px; }
+  .player-name { font-size: 22px; }
+  .level-grid { gap: 12px; }
+  .level-card { padding: 18px 12px; }
+  .level-piece-icon { font-size: 36px; }
+}
+
+@media (min-width: 768px) {
+  .level-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 650px;
+  }
+}
+
+/* Safe area for notched iPads */
+@supports (padding: env(safe-area-inset-top)) {
+  #screen-select { padding-top: calc(env(safe-area-inset-top) + 40px); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- ============================================================
+       SCREEN: PLAYER SELECT
+       ============================================================ -->
+  <div id="screen-select" class="screen active">
+    <h1 class="app-title"><span class="crown">♟</span> MeitaRay Chess</h1>
+    <p class="app-subtitle">Choose your player</p>
+    <div class="player-cards">
+      <button class="player-card ray" onclick="selectPlayer('ray')">
+        <div class="player-icon">♛</div>
+        <div class="player-name">Ray</div>
+        <div class="player-stars-display" id="ray-total-stars">⭐ 0</div>
+      </button>
+      <button class="player-card meitar" onclick="selectPlayer('meitar')">
+        <div class="player-icon">♞</div>
+        <div class="player-name">Meitar</div>
+        <div class="player-stars-display" id="meitar-total-stars">⭐ 0</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN: LEVEL MAP
+       ============================================================ -->
+  <div id="screen-map" class="screen">
+    <div class="map-header">
+      <button class="btn-back" onclick="showScreen('select')">←</button>
+      <h2 class="map-title" id="map-player-name"></h2>
+      <div class="total-stars" id="map-total-stars"></div>
+    </div>
+    <div class="level-grid" id="level-grid"></div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN: GAME
+       ============================================================ -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <button class="btn-back" onclick="exitGame()">←</button>
+      <div class="game-info">
+        <div class="game-level-name" id="game-level-name"></div>
+        <div class="game-progress" id="game-progress">
+          <div class="progress-dots" id="progress-dots"></div>
+          <span class="progress-text" id="progress-text"></span>
+        </div>
+      </div>
+      <button class="btn-hint" onclick="showHint()">💡</button>
+    </div>
+    <div class="board-container">
+      <div class="board-wrapper">
+        <div class="rank-labels" id="rank-labels"></div>
+        <div class="board-col">
+          <div class="board" id="board"></div>
+          <div class="file-labels" id="file-labels"></div>
+        </div>
+      </div>
+    </div>
+    <p class="game-instruction" id="game-instruction"></p>
+  </div>
+
+</div>
+
+<!-- Level Complete Overlay -->
+<div class="overlay" id="overlay-complete">
+  <div class="complete-card">
+    <h2 class="complete-title" id="complete-title"></h2>
+    <div class="complete-stars" id="complete-stars"></div>
+    <p class="complete-msg" id="complete-msg"></p>
+    <div class="complete-actions" id="complete-actions"></div>
+  </div>
+</div>
+
+<!-- Confetti container -->
+<div id="confetti"></div>
+
+<script>
+/* =============================================================
+   AUDIO — synthesized tones via Web Audio API (no files needed)
+   Works on iOS Safari after first user tap
+   ============================================================= */
+let audioCtx;
+
+function initAudio() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e) { /* silent fail — game works without sound */ }
+}
+
+function playNote(freq, duration, delay, type, vol) {
+  if (!audioCtx) return;
+  try {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const t = audioCtx.currentTime + (delay || 0);
+    gain.gain.setValueAtTime(vol || 0.2, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+    osc.start(t);
+    osc.stop(t + duration);
+  } catch(e) {}
+}
+
+function sfxCorrect() {
+  playNote(523, 0.12, 0);       // C5
+  playNote(659, 0.12, 0.08);    // E5
+}
+
+function sfxWrong() {
+  playNote(220, 0.25, 0, 'triangle', 0.12);
+}
+
+function sfxComplete() {
+  playNote(523, 0.15, 0);
+  playNote(659, 0.15, 0.12);
+  playNote(784, 0.15, 0.24);
+  playNote(1047, 0.35, 0.36);
+}
+
+function sfxStar() {
+  playNote(1047, 0.2, 0, 'sine', 0.12);
+}
+
+function sfxHint() {
+  playNote(880, 0.1, 0, 'sine', 0.1);
+  playNote(660, 0.1, 0.08, 'sine', 0.1);
+}
+
+// Init audio on first user interaction (iOS requirement)
+document.addEventListener('click', () => initAudio(), { once: true });
+document.addEventListener('touchstart', () => initAudio(), { once: true });
+
+
+/* =============================================================
+   LEVEL DATA — Phase 1: Tap Reachable Squares
+   ============================================================= */
+const PIECE_SYMBOLS = {
+  K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟'
+};
+
+const LEVELS = [
+  {
+    id: 1,
+    name: 'Knight Hops',
+    piece: { type: 'N', square: 'e4' },
+    blockers: [],
+    instruction: 'Tap every square the knight can jump to!',
+    theme: '#8b5cf6'
+  },
+  {
+    id: 2,
+    name: "King's Garden",
+    piece: { type: 'K', square: 'd5' },
+    blockers: [],
+    instruction: 'Tap every square the king can step to!',
+    theme: '#3b82f6'
+  },
+  {
+    id: 3,
+    name: 'Rook Lines',
+    piece: { type: 'R', square: 'e4' },
+    blockers: [
+      { square: 'e7', type: 'P' },
+      { square: 'b4', type: 'P' }
+    ],
+    instruction: 'Find all the squares the rook can reach! Pieces block the way.',
+    theme: '#ef4444'
+  },
+  {
+    id: 4,
+    name: 'Bishop Paths',
+    piece: { type: 'B', square: 'd4' },
+    blockers: [
+      { square: 'f6', type: 'P' },
+      { square: 'b2', type: 'P' }
+    ],
+    instruction: 'Mark every square the bishop can see! Watch for blockers.',
+    theme: '#10b981'
+  },
+  {
+    id: 5,
+    name: 'Corner Knight',
+    piece: { type: 'N', square: 'b1' },
+    blockers: [
+      { square: 'c3', type: 'P' }
+    ],
+    instruction: 'Knights are weaker in the corner. Find every possible jump!',
+    theme: '#f59e0b'
+  },
+  {
+    id: 6,
+    name: "Queen's Power",
+    piece: { type: 'Q', square: 'd4' },
+    blockers: [
+      { square: 'd7', type: 'P' },
+      { square: 'g4', type: 'P' },
+      { square: 'b2', type: 'P' },
+      { square: 'f6', type: 'P' },
+      { square: 'a4', type: 'P' }
+    ],
+    instruction: 'The queen combines rook + bishop! Find every square she controls.',
+    theme: '#ec4899'
+  }
+];
+
+const COMPLETE_MESSAGES = {
+  3: ['Perfect! 🌟', 'Flawless! ✨', 'Amazing! 💎', 'Brilliant! 🏆'],
+  2: ['Great job! 🎉', 'Well done! 👏', 'Nice work! 💪'],
+  1: ['You did it! 🎊', 'Level cleared! 👍', 'Keep going! 🚀']
+};
+
+const STAR_MESSAGES = {
+  3: 'No mistakes — perfect score!',
+  2: 'Almost perfect! Try again for 3 stars.',
+  1: 'Completed! Replay to earn more stars.'
+};
+
+
+/* =============================================================
+   GAME STATE
+   ============================================================= */
+let currentPlayer = null;   // 'ray' or 'meitar'
+let gameData = null;        // { ray: { stars: [...] }, meitar: { stars: [...] } }
+let currentLevelId = null;
+let correctSquares = [];    // squares the player needs to find
+let foundSquares = [];      // squares already found
+let mistakes = 0;
+let gameActive = false;     // prevents taps after level complete
+
+
+/* =============================================================
+   UTILITY FUNCTIONS — coordinate conversions
+   ============================================================= */
+function toCoords(sq) {
+  return {
+    file: sq.charCodeAt(0) - 97,  // a=0 .. h=7
+    rank: parseInt(sq[1]) - 1      // 1=0 .. 8=7
+  };
+}
+
+function toSquare(file, rank) {
+  return String.fromCharCode(97 + file) + (rank + 1);
+}
+
+function isOnBoard(file, rank) {
+  return file >= 0 && file < 8 && rank >= 0 && rank < 8;
+}
+
+
+/* =============================================================
+   PIECE MOVEMENT CALCULATORS
+   Returns array of algebraic squares a piece can reach
+   ============================================================= */
+function getReachableSquares(level) {
+  // Build occupied map: square → 'friendly' | 'enemy'
+  const occupied = {};
+  occupied[level.piece.square] = 'friendly';
+  for (const b of level.blockers) {
+    occupied[b.square] = 'enemy';
+  }
+
+  const { type, square } = level.piece;
+  switch (type) {
+    case 'N': return getKnightMoves(square, occupied);
+    case 'K': return getKingMoves(square, occupied);
+    case 'R': return getSlidingMoves(square, occupied, [[0,1],[0,-1],[1,0],[-1,0]]);
+    case 'B': return getSlidingMoves(square, occupied, [[1,1],[1,-1],[-1,1],[-1,-1]]);
+    case 'Q': return getSlidingMoves(square, occupied, [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]);
+    default: return [];
+  }
+}
+
+function getKnightMoves(sq, occupied) {
+  const { file, rank } = toCoords(sq);
+  const deltas = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+  const moves = [];
+  for (const [df, dr] of deltas) {
+    const f = file + df, r = rank + dr;
+    if (isOnBoard(f, r)) {
+      const target = toSquare(f, r);
+      if (occupied[target] !== 'friendly') moves.push(target);
+    }
+  }
+  return moves;
+}
+
+function getKingMoves(sq, occupied) {
+  const { file, rank } = toCoords(sq);
+  const deltas = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  const moves = [];
+  for (const [df, dr] of deltas) {
+    const f = file + df, r = rank + dr;
+    if (isOnBoard(f, r)) {
+      const target = toSquare(f, r);
+      if (occupied[target] !== 'friendly') moves.push(target);
+    }
+  }
+  return moves;
+}
+
+function getSlidingMoves(sq, occupied, directions) {
+  const { file, rank } = toCoords(sq);
+  const moves = [];
+  for (const [df, dr] of directions) {
+    let f = file + df, r = rank + dr;
+    while (isOnBoard(f, r)) {
+      const target = toSquare(f, r);
+      if (occupied[target] === 'friendly') break;
+      moves.push(target);
+      if (occupied[target] === 'enemy') break; // can capture but stop
+      f += df;
+      r += dr;
+    }
+  }
+  return moves;
+}
+
+
+/* =============================================================
+   STORAGE — localStorage persistence
+   ============================================================= */
+const STORAGE_KEY = 'meitaray-chess';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      // Ensure arrays are correct length
+      for (const player of ['ray', 'meitar']) {
+        if (!data[player]) data[player] = { stars: [] };
+        while (data[player].stars.length < LEVELS.length) {
+          data[player].stars.push(0);
+        }
+      }
+      return data;
+    }
+  } catch(e) {}
+  return {
+    ray: { stars: new Array(LEVELS.length).fill(0) },
+    meitar: { stars: new Array(LEVELS.length).fill(0) }
+  };
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
+  } catch(e) {}
+}
+
+function getTotalStars(player) {
+  return gameData[player].stars.reduce((sum, s) => sum + s, 0);
+}
+
+function getMaxStars() {
+  return LEVELS.length * 3;
+}
+
+function isLevelUnlocked(levelId, player) {
+  if (levelId === 1) return true;
+  return gameData[player].stars[levelId - 2] > 0; // previous level completed
+}
+
+
+/* =============================================================
+   SCREEN MANAGEMENT
+   ============================================================= */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+  // Update screen content before showing
+  if (id === 'select') updateSelectScreen();
+  if (id === 'map') updateMapScreen();
+
+  // Small delay for transition
+  requestAnimationFrame(() => {
+    document.getElementById('screen-' + id).classList.add('active');
+  });
+}
+
+function updateSelectScreen() {
+  document.getElementById('ray-total-stars').textContent = '⭐ ' + getTotalStars('ray');
+  document.getElementById('meitar-total-stars').textContent = '⭐ ' + getTotalStars('meitar');
+}
+
+function updateMapScreen() {
+  const name = currentPlayer === 'ray' ? 'Ray' : 'Meitar';
+  document.getElementById('map-player-name').textContent = name + "'s Levels";
+  document.getElementById('map-total-stars').textContent =
+    '⭐ ' + getTotalStars(currentPlayer) + ' / ' + getMaxStars();
+  renderLevelGrid();
+}
+
+
+/* =============================================================
+   PLAYER SELECTION
+   ============================================================= */
+function selectPlayer(player) {
+  currentPlayer = player;
+  showScreen('map');
+}
+
+
+/* =============================================================
+   LEVEL MAP RENDERING
+   ============================================================= */
+function renderLevelGrid() {
+  const grid = document.getElementById('level-grid');
+  grid.innerHTML = '';
+
+  LEVELS.forEach(level => {
+    const stars = gameData[currentPlayer].stars[level.id - 1];
+    const unlocked = isLevelUnlocked(level.id, currentPlayer);
+    const completed = stars > 0;
+    const isCurrent = unlocked && !completed;
+
+    const card = document.createElement('button');
+    card.className = 'level-card';
+    if (completed) card.classList.add('completed');
+    else if (isCurrent) card.classList.add('current');
+    else if (unlocked) card.classList.add('unlocked');
+    else card.classList.add('locked');
+
+    // Determine what to show for stars area
+    let starsHTML = '';
+    if (completed) {
+      for (let i = 1; i <= 3; i++) {
+        starsHTML += `<span class="${i <= stars ? 'star-filled' : 'star-empty'}">★</span>`;
+      }
+    } else if (!unlocked) {
+      starsHTML = '<span class="level-lock">🔒</span>';
+    } else {
+      starsHTML = '<span class="star-empty">☆</span>'.repeat(3);
+    }
+
+    card.innerHTML = `
+      <div class="level-number">${level.id}</div>
+      <div class="level-piece-icon">${PIECE_SYMBOLS[level.piece.type]}</div>
+      <div class="level-name">${level.name}</div>
+      <div class="level-stars">${starsHTML}</div>
+    `;
+
+    if (unlocked) {
+      card.onclick = () => startLevel(level.id);
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+
+/* =============================================================
+   GAME — initialization & board rendering
+   ============================================================= */
+function startLevel(levelId) {
+  currentLevelId = levelId;
+  const level = LEVELS[levelId - 1];
+
+  // Compute correct answers
+  correctSquares = getReachableSquares(level);
+  foundSquares = [];
+  mistakes = 0;
+  gameActive = true;
+
+  // Update header
+  document.getElementById('game-level-name').textContent = level.name;
+  document.getElementById('game-instruction').textContent = level.instruction;
+
+  // Render board
+  renderBoard(level);
+
+  // Render progress
+  updateProgress();
+
+  // Show game screen
+  showScreen('game');
+}
+
+function renderBoard(level) {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  // Build piece map for quick lookup
+  const pieceMap = {};
+  pieceMap[level.piece.square] = { type: level.piece.type, isMain: true };
+  for (const b of level.blockers) {
+    pieceMap[b.square] = { type: b.type, isMain: false };
+  }
+
+  // Render 64 squares (a8=top-left to h1=bottom-right)
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const rank = 7 - row;  // row 0 = rank 8, row 7 = rank 1
+      const file = col;      // col 0 = file a
+      const sq = toSquare(file, rank);
+      const isLight = (row + col) % 2 === 0;
+
+      const div = document.createElement('div');
+      div.className = 'square ' + (isLight ? 'light' : 'dark');
+      div.dataset.square = sq;
+
+      // Mark the main piece's square
+      if (sq === level.piece.square) {
+        div.classList.add('piece-square');
+      }
+
+      // Add piece if present
+      if (pieceMap[sq]) {
+        const span = document.createElement('span');
+        span.className = 'piece ' + (pieceMap[sq].isMain ? 'main-piece' : 'blocker-piece');
+        span.textContent = PIECE_SYMBOLS[pieceMap[sq].type];
+        div.appendChild(span);
+      }
+
+      // Click/tap handler
+      div.addEventListener('click', () => handleSquareTap(sq, div));
+
+      board.appendChild(div);
+    }
+  }
+
+  // Render coordinate labels
+  renderCoordinateLabels();
+}
+
+function renderCoordinateLabels() {
+  // Rank labels (8 at top, 1 at bottom)
+  const rankLabels = document.getElementById('rank-labels');
+  rankLabels.innerHTML = '';
+  for (let r = 8; r >= 1; r--) {
+    const span = document.createElement('span');
+    span.textContent = r;
+    rankLabels.appendChild(span);
+  }
+
+  // File labels (a to h)
+  const fileLabels = document.getElementById('file-labels');
+  fileLabels.innerHTML = '';
+  for (let f = 0; f < 8; f++) {
+    const span = document.createElement('span');
+    span.textContent = String.fromCharCode(97 + f);
+    fileLabels.appendChild(span);
+  }
+}
+
+function updateProgress() {
+  const total = correctSquares.length;
+  const found = foundSquares.length;
+
+  // Update dots
+  const dotsContainer = document.getElementById('progress-dots');
+  dotsContainer.innerHTML = '';
+
+  // Show dots only if <= 14, otherwise just show text
+  if (total <= 14) {
+    for (let i = 0; i < total; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot' + (i < found ? ' found' : '');
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  // Update text
+  document.getElementById('progress-text').textContent = found + ' / ' + total;
+}
+
+
+/* =============================================================
+   GAME — tap handling
+   ============================================================= */
+function handleSquareTap(sq, el) {
+  if (!gameActive) return;
+
+  const level = LEVELS[currentLevelId - 1];
+
+  // Ignore taps on the main piece's square
+  if (sq === level.piece.square) return;
+
+  // Ignore already-found squares
+  if (foundSquares.includes(sq)) return;
+
+  // Check if this square is a correct answer
+  if (correctSquares.includes(sq)) {
+    // CORRECT!
+    foundSquares.push(sq);
+    el.classList.add('correct');
+    sfxCorrect();
+
+    // If this square had a blocker piece, fade it out (captured!)
+    const pieceEl = el.querySelector('.blocker-piece');
+    if (pieceEl) {
+      pieceEl.style.transition = 'opacity 0.3s';
+      pieceEl.style.opacity = '0';
+    }
+
+    updateProgress();
+
+    // Check if level complete
+    if (foundSquares.length === correctSquares.length) {
+      gameActive = false;
+      setTimeout(() => completeLevel(), 600);
+    }
+  } else {
+    // WRONG
+    mistakes++;
+    el.classList.add('wrong');
+    sfxWrong();
+    setTimeout(() => el.classList.remove('wrong'), 400);
+  }
+}
+
+
+/* =============================================================
+   HINT SYSTEM — highlight one unfound correct square
+   ============================================================= */
+function showHint() {
+  if (!gameActive) return;
+  const remaining = correctSquares.filter(sq => !foundSquares.includes(sq));
+  if (remaining.length === 0) return;
+
+  const hintSquare = remaining[Math.floor(Math.random() * remaining.length)];
+  const el = document.querySelector(`.square[data-square="${hintSquare}"]`);
+  if (el) {
+    el.classList.add('hint-glow');
+    sfxHint();
+    setTimeout(() => el.classList.remove('hint-glow'), 1800);
+  }
+}
+
+
+/* =============================================================
+   LEVEL COMPLETION
+   ============================================================= */
+function completeLevel() {
+  // Calculate stars
+  let stars;
+  if (mistakes === 0) stars = 3;
+  else if (mistakes <= 2) stars = 2;
+  else stars = 1;
+
+  // Save progress (keep best score)
+  const prevStars = gameData[currentPlayer].stars[currentLevelId - 1];
+  if (stars > prevStars) {
+    gameData[currentPlayer].stars[currentLevelId - 1] = stars;
+    saveData();
+  }
+
+  // Play celebration
+  sfxComplete();
+  createConfetti();
+
+  // Show overlay
+  const msgs = COMPLETE_MESSAGES[stars];
+  document.getElementById('complete-title').textContent =
+    msgs[Math.floor(Math.random() * msgs.length)];
+  document.getElementById('complete-msg').textContent = STAR_MESSAGES[stars];
+
+  // Stars
+  const starsContainer = document.getElementById('complete-stars');
+  starsContainer.innerHTML = '';
+  for (let i = 1; i <= 3; i++) {
+    const span = document.createElement('span');
+    span.className = 'complete-star ' + (i <= stars ? 'earned' : 'empty');
+    span.textContent = '★';
+    starsContainer.appendChild(span);
+    // Trigger animation after a tiny delay
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => span.classList.add('animate'));
+    });
+  }
+
+  // Action buttons
+  const actions = document.getElementById('complete-actions');
+  actions.innerHTML = '';
+
+  const replayBtn = document.createElement('button');
+  replayBtn.className = 'btn btn-replay';
+  replayBtn.textContent = '↻ Replay';
+  replayBtn.onclick = () => {
+    hideOverlay();
+    startLevel(currentLevelId);
+  };
+  actions.appendChild(replayBtn);
+
+  if (currentLevelId < LEVELS.length) {
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'btn btn-next';
+    nextBtn.textContent = 'Next Level →';
+    nextBtn.onclick = () => {
+      hideOverlay();
+      startLevel(currentLevelId + 1);
+    };
+    actions.appendChild(nextBtn);
+  } else {
+    const mapBtn = document.createElement('button');
+    mapBtn.className = 'btn btn-map-return';
+    mapBtn.textContent = '🎓 All Done!';
+    mapBtn.onclick = () => {
+      hideOverlay();
+      showScreen('map');
+    };
+    actions.appendChild(mapBtn);
+  }
+
+  // Show overlay
+  const overlay = document.getElementById('overlay-complete');
+  overlay.classList.add('visible');
+}
+
+function hideOverlay() {
+  document.getElementById('overlay-complete').classList.remove('visible');
+}
+
+function exitGame() {
+  hideOverlay();
+  gameActive = false;
+  showScreen('map');
+}
+
+
+/* =============================================================
+   CONFETTI — pure CSS/JS particle burst
+   ============================================================= */
+function createConfetti() {
+  const container = document.getElementById('confetti');
+  container.innerHTML = '';
+  const colors = ['#fbbf24','#f87171','#34d399','#60a5fa','#a78bfa','#fb923c','#f472b6','#22d3ee'];
+
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-particle';
+    const size = 6 + Math.random() * 10;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.8;
+    const duration = 1.5 + Math.random() * 2;
+    const rotation = Math.floor(Math.random() * 360);
+    const borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+
+    p.style.cssText = `
+      left: ${left}%;
+      width: ${size}px;
+      height: ${size * (0.4 + Math.random() * 0.6)}px;
+      background: ${color};
+      animation-delay: ${delay}s;
+      animation-duration: ${duration}s;
+      border-radius: ${borderRadius};
+      transform: rotate(${rotation}deg);
+    `;
+    container.appendChild(p);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 4000);
+}
+
+
+/* =============================================================
+   INITIALIZATION
+   ============================================================= */
+function init() {
+  gameData = loadData();
+  updateSelectScreen();
+
+  // Prevent board scrolling on touch
+  document.getElementById('board').addEventListener('touchmove', e => {
+    e.preventDefault();
+  }, { passive: false });
+
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
