@@ -1752,6 +1752,177 @@ const LEVELS = [
     reveal: 'CHECKMATE! You chose a tiny pawn over a rook and bishop — because checkmate ends the game! That\'s grandmaster thinking! 🏆♚💀',
     instruction: 'A rook AND a bishop to capture — but is there something the opponent won\'t survive? 🧩',
     theme: '#f59e0b'
+  },
+
+  /* =============================================================
+     Phase 6: Checkmate in 2 (Levels 49–54)
+     Two-move puzzles: give check, opponent responds, deliver mate
+     ============================================================= */
+  {
+    // Qe8+ Qxe8 Rxe8# — Queen sacrifice, rook recaptures on back rank
+    id: 49,
+    name: 'Royal Trap',
+    type: 'checkmate-in-2',
+    phase: 6,
+    piece: { type: 'Q', square: 'e1' },
+    piece2: { type: 'R', square: 'e2' },
+    friendlies: [
+      { type: 'R', square: 'e2' },
+      { type: 'K', square: 'g1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'd8', type: 'Q' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    move1: 'e8',
+    opponentFrom: 'd8',
+    opponentTo: 'e8',
+    opponentCaptures: true,
+    move2: 'e8',
+    instruction: 'Checkmate in 2! Give check first ♚',
+    instruction2: 'The queen was captured — now deliver checkmate! ♚♚',
+    theme: '#dc2626'
+  },
+  {
+    // Re8+ Kh7 Qxg7# — Rook check forces king to corner, queen mates
+    id: 50,
+    name: 'Corner Hunt',
+    type: 'checkmate-in-2',
+    phase: 6,
+    piece: { type: 'R', square: 'e1' },
+    piece2: { type: 'Q', square: 'b2' },
+    friendlies: [
+      { type: 'Q', square: 'b2' },
+      { type: 'K', square: 'a1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' }
+    ],
+    move1: 'e8',
+    opponentFrom: 'g8',
+    opponentTo: 'h7',
+    opponentCaptures: false,
+    move2: 'g7',
+    instruction: 'Checkmate in 2! Give check first ♚',
+    instruction2: 'The king ran — now deliver checkmate! ♚♚',
+    theme: '#dc2626'
+  },
+  {
+    // Re8+ Kh7 Qf5# — Rook check, queen diagonal mate with knight guarding
+    id: 51,
+    name: 'Nowhere to Hide',
+    type: 'checkmate-in-2',
+    phase: 6,
+    piece: { type: 'R', square: 'e1' },
+    piece2: { type: 'Q', square: 'f4' },
+    friendlies: [
+      { type: 'Q', square: 'f4' },
+      { type: 'N', square: 'g4' },
+      { type: 'K', square: 'a1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' }
+    ],
+    move1: 'e8',
+    opponentFrom: 'g8',
+    opponentTo: 'h7',
+    opponentCaptures: false,
+    move2: 'f5',
+    instruction: 'Checkmate in 2! Give check first ♚',
+    instruction2: 'The king ran — now deliver checkmate! ♚♚',
+    theme: '#dc2626'
+  },
+  {
+    // Qxh7+ Kf8 Ra8# — Queen takes h-pawn, rook swoops to back rank
+    id: 52,
+    name: "Queen's Gambit",
+    type: 'checkmate-in-2',
+    phase: 6,
+    piece: { type: 'Q', square: 'h5' },
+    piece2: { type: 'R', square: 'a1' },
+    friendlies: [
+      { type: 'R', square: 'a1' },
+      { type: 'N', square: 'd5' },
+      { type: 'K', square: 'g1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    move1: 'h7',
+    opponentFrom: 'g8',
+    opponentTo: 'f8',
+    opponentCaptures: false,
+    move2: 'a8',
+    instruction: 'Checkmate in 2! Give check first ♚',
+    instruction2: 'The king ran — now deliver checkmate! ♚♚',
+    theme: '#dc2626'
+  },
+  {
+    // Qd8+ Qxd8 Rxd8# — Queen sacrifice on d-file, rook recaptures
+    id: 53,
+    name: 'Double Strike',
+    type: 'checkmate-in-2',
+    phase: 6,
+    piece: { type: 'Q', square: 'd3' },
+    piece2: { type: 'R', square: 'd1' },
+    friendlies: [
+      { type: 'R', square: 'd1' },
+      { type: 'B', square: 'c2' },
+      { type: 'K', square: 'h1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'b8', type: 'Q' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    move1: 'd8',
+    opponentFrom: 'b8',
+    opponentTo: 'd8',
+    opponentCaptures: true,
+    move2: 'd8',
+    instruction: 'Checkmate in 2! Give check first ♚',
+    instruction2: 'The queen was captured — now deliver checkmate! ♚♚',
+    theme: '#dc2626'
+  },
+  {
+    // Qxh7+ Kf8 Rxe8# — Queen takes h-pawn, rook captures queen for mate
+    id: 54,
+    name: 'Final Checkmate',
+    type: 'checkmate-in-2',
+    phase: 6,
+    piece: { type: 'Q', square: 'h5' },
+    piece2: { type: 'R', square: 'e2' },
+    friendlies: [
+      { type: 'R', square: 'e2' },
+      { type: 'K', square: 'g1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'e8', type: 'Q' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    move1: 'h7',
+    opponentFrom: 'g8',
+    opponentTo: 'f8',
+    opponentCaptures: false,
+    move2: 'e8',
+    instruction: 'Checkmate in 2! Give check first ♚',
+    instruction2: 'The king ran — now deliver checkmate! ♚♚',
+    theme: '#dc2626'
   }
 ];
 
@@ -1778,6 +1949,8 @@ let correctSquares = [];    // squares the player needs to find
 let foundSquares = [];      // squares already found
 let mistakes = 0;
 let gameActive = false;     // prevents taps after level complete
+let mateStep = 0;           // 0 = not mate-in-2, 1 = step 1, 2 = step 2
+let mateStep2Level = null;  // computed step 2 level data for checkmate-in-2
 
 
 /* =============================================================
@@ -2140,6 +2313,11 @@ function computeCorrectSquares(level) {
       return level.answers || [];
     }
 
+    case 'checkmate-in-2': {
+      // Step 1: first move target, Step 2: finishing move target
+      return mateStep === 2 ? [level.move2] : [level.move1];
+    }
+
     default:
       return reachable;
   }
@@ -2277,6 +2455,69 @@ function _isCheckmate(level, moveTo, enemyKing) {
 
 
 /* =============================================================
+   CHECKMATE-IN-2 — step 2 board computation & transition
+   ============================================================= */
+function getStep2Level(level) {
+  // Compute board position after move 1 + opponent response
+  const newPiece = { type: level.piece2.type, square: level.piece2.square };
+
+  // Friendlies: original minus piece2 (it's now the main piece)
+  let newFriendlies = (level.friendlies || []).filter(f =>
+    f.square !== level.piece2.square
+  );
+  // If original piece wasn't captured, it's now a friendly at move1
+  if (!level.opponentCaptures) {
+    newFriendlies.push({ type: level.piece.type, square: level.move1 });
+  }
+
+  // Blockers: move responding piece, remove any piece captured on move1
+  let newBlockers = [];
+  for (const b of level.blockers) {
+    // Remove blocker captured by our piece on move1
+    if (b.square === level.move1 && b.square !== level.opponentTo) {
+      continue;
+    }
+    // Move the responding piece to its new square
+    if (b.square === level.opponentFrom) {
+      newBlockers.push({ type: b.type, square: level.opponentTo });
+    } else {
+      newBlockers.push({ type: b.type, square: b.square });
+    }
+  }
+
+  return {
+    ...level,
+    piece: newPiece,
+    friendlies: newFriendlies,
+    blockers: newBlockers
+  };
+}
+
+function transitionToMateStep2() {
+  const level = LEVELS[currentLevelId - 1];
+  mateStep = 2;
+
+  // Compute step 2 position
+  mateStep2Level = getStep2Level(level);
+
+  // Reset for step 2
+  correctSquares = [level.move2];
+  foundSquares = [];
+  gameActive = true;
+
+  // Update instruction
+  document.getElementById('game-instruction').textContent =
+    level.instruction2 || 'Now deliver checkmate! ♚♚';
+
+  // Re-render the board with step 2 position
+  renderBoard(mateStep2Level);
+
+  // Update progress
+  updateProgress();
+}
+
+
+/* =============================================================
    STORAGE — localStorage persistence
    ============================================================= */
 const STORAGE_KEY = 'meitaray-chess';
@@ -2405,6 +2646,11 @@ function renderLevelGrid() {
       div.className = 'phase-divider';
       div.textContent = '🧩 Puzzle Master';
       grid.appendChild(div);
+    } else if (level.id === 49) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '♚♚ Checkmate in 2';
+      grid.appendChild(div);
     }
 
     const stars = gameData[currentPlayer].stars[level.id - 1];
@@ -2463,6 +2709,8 @@ function startLevel(levelId) {
   foundSquares = [];
   mistakes = 0;
   gameActive = true;
+  mateStep = level.type === 'checkmate-in-2' ? 1 : 0;
+  mateStep2Level = null;
 
   // Update header
   document.getElementById('game-level-name').textContent = level.name;
@@ -2551,7 +2799,7 @@ function renderBoard(level) {
   renderCoordinateLabels();
 
   // Show candidate dots for levels where kids pick among reachable squares
-  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square', 'tap-checkmate', 'tap-best-move'].includes(level.type)) {
+  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square', 'tap-checkmate', 'tap-best-move', 'checkmate-in-2'].includes(level.type)) {
     const allReachable = getReachableSquares(level);
     for (const sq of allReachable) {
       const el = document.querySelector(`.square[data-square="${sq}"]`);
@@ -2581,6 +2829,22 @@ function renderCoordinateLabels() {
 }
 
 function updateProgress() {
+  const level = LEVELS[currentLevelId - 1];
+
+  // Special progress for checkmate-in-2: show 2 move dots
+  if (level.type === 'checkmate-in-2') {
+    const dotsContainer = document.getElementById('progress-dots');
+    dotsContainer.innerHTML = '';
+    const dot1 = document.createElement('div');
+    dot1.className = 'progress-dot' + (mateStep > 1 ? ' found' : '');
+    dotsContainer.appendChild(dot1);
+    const dot2 = document.createElement('div');
+    dot2.className = 'progress-dot' + (mateStep === 2 && foundSquares.length > 0 ? ' found' : '');
+    dotsContainer.appendChild(dot2);
+    document.getElementById('progress-text').textContent = 'Move ' + mateStep + ' / 2';
+    return;
+  }
+
   const total = correctSquares.length;
   const found = foundSquares.length;
 
@@ -2608,7 +2872,9 @@ function updateProgress() {
 function handleSquareTap(sq, el) {
   if (!gameActive) return;
 
-  const level = LEVELS[currentLevelId - 1];
+  const originalLevel = LEVELS[currentLevelId - 1];
+  const level = (originalLevel.type === 'checkmate-in-2' && mateStep === 2 && mateStep2Level)
+    ? mateStep2Level : originalLevel;
   const type = level.type || 'tap-reachable';
 
   // Ignore taps on the main piece's square and friendly pieces
@@ -2625,7 +2891,7 @@ function handleSquareTap(sq, el) {
     const hasEnemy = level.blockers.some(b => b.square === sq);
     if (!hasEnemy) return; // ignore empty square taps — only enemy piece taps count
   }
-  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square', 'tap-checkmate', 'tap-best-move'].includes(type) && !correctSquares.includes(sq)) {
+  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square', 'tap-checkmate', 'tap-best-move', 'checkmate-in-2'].includes(type) && !correctSquares.includes(sq)) {
     const reachable = getReachableSquares(level);
     if (!reachable.includes(sq)) return; // ignore non-reachable squares
   }
@@ -2648,6 +2914,12 @@ function handleSquareTap(sq, el) {
 
     // Check if level complete
     if (foundSquares.length === correctSquares.length) {
+      // Mate-in-2: transition from step 1 → step 2
+      if (originalLevel.type === 'checkmate-in-2' && mateStep === 1) {
+        gameActive = false;
+        setTimeout(() => transitionToMateStep2(), 800);
+        return;
+      }
       gameActive = false;
       setTimeout(() => completeLevel(), 600);
     }
