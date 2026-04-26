@@ -820,6 +820,44 @@ html, body {
 @supports (padding: env(safe-area-inset-top)) {
   #screen-select { padding-top: calc(env(safe-area-inset-top) + 40px); }
 }
+
+/* ============================================================
+   MINI-GAME STYLES
+   ============================================================ */
+.square.mg-selected {
+  box-shadow: inset 0 0 0 3px rgba(251, 191, 36, 0.9);
+}
+.square.mg-selected.light { background-color: #fde68a !important; }
+.square.mg-selected.dark { background-color: #d4a843 !important; }
+
+.square.mg-legal::before {
+  content: '';
+  position: absolute;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.45);
+  pointer-events: none;
+  z-index: 1;
+}
+.square.mg-legal.dark::before {
+  background: rgba(34, 197, 94, 0.55);
+}
+
+.square.mg-capture {
+  box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.55);
+}
+
+.square.mg-last-move.light { background-color: #bef264 !important; }
+.square.mg-last-move.dark { background-color: #84cc16 !important; }
+
+.square.mg-check.light { background-color: #fca5a5 !important; }
+.square.mg-check.dark { background-color: #ef4444 !important; }
+
+@keyframes ai-think {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
 </style>
 </head>
 
@@ -1923,6 +1961,79 @@ const LEVELS = [
     instruction: 'Checkmate in 2! Give check first ♚',
     instruction2: 'The king ran — now deliver checkmate! ♚♚',
     theme: '#dc2626'
+  },
+
+  // =========== PHASE 7: Mini-Games (Levels 55–58) ===========
+  // Real interactive games — tap a piece, see legal moves, tap to move!
+  {
+    id: 55,
+    name: 'Pawn Hunter',
+    type: 'mini-game',
+    subType: 'pawn-hunter',
+    phase: 7,
+    mapIcon: '🐴',
+    startPieces: [
+      { type: 'N', square: 'e4', color: 'white' },
+      { type: 'P', square: 'c7', color: 'black' },
+      { type: 'P', square: 'g7', color: 'black' }
+    ],
+    starThresholds: [5, 8],
+    instruction: 'Hunt the pawns! Tap your knight, then tap where to jump. Capture all pawns before they reach the bottom! 🐴',
+    theme: '#8b5cf6'
+  },
+  {
+    id: 56,
+    name: 'Pawn Blitz',
+    type: 'mini-game',
+    subType: 'pawn-hunter',
+    phase: 7,
+    mapIcon: '🐴',
+    startPieces: [
+      { type: 'N', square: 'e3', color: 'white' },
+      { type: 'P', square: 'b7', color: 'black' },
+      { type: 'P', square: 'd7', color: 'black' },
+      { type: 'P', square: 'f7', color: 'black' },
+      { type: 'P', square: 'h7', color: 'black' }
+    ],
+    starThresholds: [6, 10],
+    instruction: 'Four pawns marching! Plan your route carefully — every move counts! 🐴⚔️',
+    theme: '#dc2626'
+  },
+  {
+    id: 57,
+    name: 'Queen Sweep',
+    type: 'mini-game',
+    subType: 'queen-sweep',
+    phase: 7,
+    mapIcon: '👑',
+    startPieces: [
+      { type: 'Q', square: 'a1', color: 'white' },
+      { type: 'P', square: 'c3', color: 'black' },
+      { type: 'P', square: 'f3', color: 'black' },
+      { type: 'N', square: 'f6', color: 'black' },
+      { type: 'B', square: 'c6', color: 'black' },
+      { type: 'R', square: 'a8', color: 'black' },
+      { type: 'P', square: 'h1', color: 'black' }
+    ],
+    starThresholds: [6, 9],
+    instruction: 'Sweep the board! Move your queen to capture all enemies in as few moves as possible 👑⚔️',
+    theme: '#f59e0b'
+  },
+  {
+    id: 58,
+    name: 'King Hunt',
+    type: 'mini-game',
+    subType: 'checkmate-king',
+    phase: 7,
+    mapIcon: '🏆',
+    startPieces: [
+      { type: 'K', square: 'e1', color: 'white' },
+      { type: 'Q', square: 'd1', color: 'white' },
+      { type: 'K', square: 'e5', color: 'black' }
+    ],
+    starThresholds: [12, 20],
+    instruction: 'Corner the enemy king and deliver CHECKMATE! Tap a piece, then tap where to move it 👑🏆',
+    theme: '#059669'
   }
 ];
 
@@ -1951,6 +2062,7 @@ let mistakes = 0;
 let gameActive = false;     // prevents taps after level complete
 let mateStep = 0;           // 0 = not mate-in-2, 1 = step 1, 2 = step 2
 let mateStep2Level = null;  // computed step 2 level data for checkmate-in-2
+let miniState = null;       // mini-game state: { pieces, turn, selected, legalMoves, moveCount, ... }
 
 
 /* =============================================================
@@ -2651,6 +2763,11 @@ function renderLevelGrid() {
       div.className = 'phase-divider';
       div.textContent = '♚♚ Checkmate in 2';
       grid.appendChild(div);
+    } else if (level.id === 55) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '🎮 Mini-Games';
+      grid.appendChild(div);
     }
 
     const stars = gameData[currentPlayer].stars[level.id - 1];
@@ -2677,9 +2794,11 @@ function renderLevelGrid() {
       starsHTML = '<span class="star-empty">☆</span>'.repeat(3);
     }
 
-    const pieceIcon = level.mystery
-      ? '🧩'
-      : (level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[level.piece.type];
+    const pieceIcon = level.mapIcon
+      ? level.mapIcon
+      : level.mystery
+        ? '🧩'
+        : (level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[level.piece.type];
 
     card.innerHTML = `
       <div class="level-number">${level.id}</div>
@@ -2703,6 +2822,12 @@ function renderLevelGrid() {
 function startLevel(levelId) {
   currentLevelId = levelId;
   const level = LEVELS[levelId - 1];
+
+  // Mini-games have their own engine
+  if (level.type === 'mini-game') {
+    startMiniGame(level);
+    return;
+  }
 
   // Compute correct answers based on level type
   correctSquares = computeCorrectSquares(level);
@@ -2872,6 +2997,12 @@ function updateProgress() {
 function handleSquareTap(sq, el) {
   if (!gameActive) return;
 
+  // Mini-games have their own tap handler
+  if (miniState) {
+    handleMiniGameTap(sq);
+    return;
+  }
+
   const originalLevel = LEVELS[currentLevelId - 1];
   const level = (originalLevel.type === 'checkmate-in-2' && mateStep === 2 && mateStep2Level)
     ? mateStep2Level : originalLevel;
@@ -2938,6 +3069,17 @@ function handleSquareTap(sq, el) {
    ============================================================= */
 function showHint() {
   if (!gameActive) return;
+
+  // Mini-games: no hints, show encouragement
+  if (miniState) {
+    sfxHint();
+    const instr = document.getElementById('game-instruction');
+    const original = instr.textContent;
+    instr.textContent = 'Plan your moves carefully! You got this 🧠';
+    setTimeout(() => { instr.textContent = original; }, 2000);
+    return;
+  }
+
   const remaining = correctSquares.filter(sq => !foundSquares.includes(sq));
   if (remaining.length === 0) return;
 
@@ -3051,6 +3193,7 @@ function hideOverlay() {
 function exitGame() {
   hideOverlay();
   gameActive = false;
+  miniState = null;
   showScreen('map');
 }
 
@@ -3087,6 +3230,613 @@ function createConfetti() {
     container.appendChild(p);
   }
   setTimeout(() => { container.innerHTML = ''; }, 4000);
+}
+
+
+/* =============================================================
+   MINI-GAME ENGINE
+   Supports: pawn-hunter, queen-sweep, checkmate-king
+   ============================================================= */
+function startMiniGame(level) {
+  miniState = {
+    subType: level.subType,
+    pieces: JSON.parse(JSON.stringify(level.startPieces)),
+    turn: 'player',
+    selected: null,
+    legalMoves: [],
+    moveCount: 0,
+    lastAIMoves: [],
+    levelId: level.id,
+    starThresholds: level.starThresholds || [10, 20]
+  };
+
+  gameActive = true;
+  mistakes = 0;
+  currentLevelId = level.id;
+
+  document.getElementById('game-level-name').textContent = level.name;
+  document.getElementById('game-instruction').textContent = level.instruction;
+
+  renderMiniGameBoard();
+  updateMiniProgress();
+  showScreen('game');
+}
+
+function renderMiniGameBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  const pieceMap = {};
+  for (const p of miniState.pieces) pieceMap[p.square] = p;
+
+  // Check if black king is in check (for checkmate-king mode)
+  let blackKingInCheck = false;
+  if (miniState.subType === 'checkmate-king') {
+    const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+    if (bk) blackKingInCheck = isMiniInCheck(bk.square, 'black');
+  }
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const rank = 7 - row;
+      const file = col;
+      const sq = toSquare(file, rank);
+      const isLight = (row + col) % 2 === 0;
+
+      const div = document.createElement('div');
+      div.className = 'square ' + (isLight ? 'light' : 'dark');
+      div.dataset.square = sq;
+
+      // Selected piece highlight
+      if (miniState.selected && sq === miniState.selected.square) {
+        div.classList.add('mg-selected');
+      }
+
+      // Legal move indicators
+      if (miniState.legalMoves.includes(sq)) {
+        if (pieceMap[sq] && pieceMap[sq].color !== (miniState.selected ? miniState.selected.color : 'white')) {
+          div.classList.add('mg-capture');
+        } else {
+          div.classList.add('mg-legal');
+        }
+      }
+
+      // Last AI move highlight
+      if (miniState.lastAIMoves && miniState.lastAIMoves.includes(sq)) {
+        div.classList.add('mg-last-move');
+      }
+
+      // Check indicator on black king
+      if (blackKingInCheck && pieceMap[sq] && pieceMap[sq].color === 'black' && pieceMap[sq].type === 'K') {
+        div.classList.add('mg-check');
+      }
+
+      // Render piece
+      if (pieceMap[sq]) {
+        const span = document.createElement('span');
+        const p = pieceMap[sq];
+        span.className = 'piece ' + (p.color === 'white' ? 'main-piece' : 'enemy-piece');
+        span.textContent = (p.color === 'white' ? WHITE_PIECES : BLACK_PIECES)[p.type];
+        div.appendChild(span);
+
+        // Show piece value badges for queen-sweep
+        if (miniState.subType === 'queen-sweep' && p.color === 'black') {
+          const badge = document.createElement('span');
+          badge.className = 'piece-value-badge';
+          badge.textContent = PIECE_VALUES[p.type];
+          div.appendChild(badge);
+        }
+      }
+
+      div.addEventListener('click', () => handleSquareTap(sq, div));
+      board.appendChild(div);
+    }
+  }
+
+  renderCoordinateLabels();
+}
+
+function handleMiniGameTap(sq) {
+  if (!gameActive || miniState.turn !== 'player') return;
+
+  const piece = miniState.pieces.find(p => p.square === sq);
+
+  // Tapping our own piece → select it
+  if (piece && piece.color === 'white') {
+    miniState.selected = piece;
+    miniState.legalMoves = getMiniLegalMoves(piece);
+    renderMiniGameBoard();
+    sfxHint();
+    return;
+  }
+
+  // Tapping a legal move → execute
+  if (miniState.selected && miniState.legalMoves.includes(sq)) {
+    executeMiniPlayerMove(sq);
+    return;
+  }
+
+  // Tapping elsewhere → deselect
+  if (miniState.selected) {
+    miniState.selected = null;
+    miniState.legalMoves = [];
+    renderMiniGameBoard();
+  }
+}
+
+function getMiniLegalMoves(piece) {
+  const occupied = {};
+  for (const p of miniState.pieces) {
+    if (p.square === piece.square) continue;
+    occupied[p.square] = p.color === piece.color ? 'friendly' : 'enemy';
+  }
+
+  let moves;
+  switch (piece.type) {
+    case 'N': moves = getKnightMoves(piece.square, occupied); break;
+    case 'K': moves = getKingMoves(piece.square, occupied); break;
+    case 'Q': moves = getSlidingMoves(piece.square, occupied, [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+    case 'R': moves = getSlidingMoves(piece.square, occupied, [[0,1],[0,-1],[1,0],[-1,0]]); break;
+    case 'B': moves = getSlidingMoves(piece.square, occupied, [[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+    default: moves = [];
+  }
+
+  // Filter: can't leave own king in check (relevant for checkmate-king)
+  if (miniState.subType === 'checkmate-king') {
+    moves = moves.filter(m => !wouldLeaveInCheck(piece, m, 'white'));
+  }
+
+  // For king: can't move adjacent to enemy king
+  if (piece.type === 'K') {
+    const enemyKing = miniState.pieces.find(p => p.color !== piece.color && p.type === 'K');
+    if (enemyKing) {
+      const { file: ekf, rank: ekr } = toCoords(enemyKing.square);
+      moves = moves.filter(m => {
+        const { file: mf, rank: mr } = toCoords(m);
+        return Math.abs(mf - ekf) > 1 || Math.abs(mr - ekr) > 1;
+      });
+    }
+  }
+
+  return moves;
+}
+
+// Simulate a move and check if own king would be in check
+function wouldLeaveInCheck(piece, targetSq, color) {
+  const tempPieces = miniState.pieces.map(p => ({...p}));
+  const movedPiece = tempPieces.find(p =>
+    p.square === piece.square && p.color === piece.color && p.type === piece.type
+  );
+
+  // Remove captured piece
+  const capIdx = tempPieces.findIndex(p => p.square === targetSq && p.color !== color);
+  if (capIdx >= 0) tempPieces.splice(capIdx, 1);
+
+  movedPiece.square = targetSq;
+
+  const king = tempPieces.find(p => p.color === color && p.type === 'K');
+  if (!king) return false;
+
+  return isTempInCheck(king.square, color, tempPieces);
+}
+
+function isMiniInCheck(kingSq, kingColor) {
+  return isTempInCheck(kingSq, kingColor, miniState.pieces);
+}
+
+function isTempInCheck(kingSq, kingColor, pieces) {
+  const enemies = pieces.filter(p => p.color !== kingColor);
+  for (const enemy of enemies) {
+    const occ = {};
+    for (const p of pieces) {
+      if (p.square === enemy.square) continue;
+      occ[p.square] = p.color === enemy.color ? 'friendly' : 'enemy';
+    }
+    const attacks = getMovesForPiece(enemy.type, enemy.square, occ);
+    if (attacks.includes(kingSq)) return true;
+  }
+  return false;
+}
+
+function executeMiniPlayerMove(targetSq) {
+  const piece = miniState.selected;
+
+  // Capture?
+  const capIdx = miniState.pieces.findIndex(p => p.square === targetSq && p.color !== piece.color);
+  if (capIdx >= 0) {
+    miniState.pieces.splice(capIdx, 1);
+    sfxCorrect();
+  }
+
+  // Move
+  piece.square = targetSq;
+  miniState.selected = null;
+  miniState.legalMoves = [];
+  miniState.moveCount++;
+  miniState.lastAIMoves = [];
+
+  // Check win
+  if (checkMiniWin()) {
+    gameActive = false;
+    renderMiniGameBoard();
+    setTimeout(() => completeMiniGame(), 600);
+    return;
+  }
+
+  // Check stalemate (checkmate-king: after player move, before AI)
+  if (miniState.subType === 'checkmate-king') {
+    const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+    if (bk && isMiniStalemate(bk)) {
+      gameActive = false;
+      renderMiniGameBoard();
+      setTimeout(() => failMiniGame(
+        'Stalemate! The enemy king has no legal moves but isn\'t in check — that\'s a draw. Be careful not to trap the king!'
+      ), 600);
+      return;
+    }
+  }
+
+  renderMiniGameBoard();
+  updateMiniProgress();
+
+  // AI turn (skip for queen-sweep — enemies don't move)
+  if (miniState.subType !== 'queen-sweep') {
+    miniState.turn = 'ai';
+    setTimeout(() => {
+      executeMiniAI();
+      miniState.turn = 'player';
+
+      // Check loss after AI move
+      const lossMsg = checkMiniLoss();
+      if (lossMsg) {
+        gameActive = false;
+        renderMiniGameBoard();
+        setTimeout(() => failMiniGame(lossMsg), 400);
+        return;
+      }
+
+      renderMiniGameBoard();
+      updateMiniProgress();
+    }, 450);
+  }
+}
+
+function executeMiniAI() {
+  switch (miniState.subType) {
+    case 'pawn-hunter': return pawnHunterAI();
+    case 'checkmate-king': return checkmateKingAI();
+  }
+}
+
+// ——— Pawn Hunter AI: all pawns advance one rank toward rank 1 ———
+function pawnHunterAI() {
+  miniState.lastAIMoves = [];
+  const pawns = miniState.pieces.filter(p => p.color === 'black' && p.type === 'P');
+  for (const pawn of pawns) {
+    const { file, rank } = toCoords(pawn.square);
+    const newRank = rank - 1;
+    if (newRank >= 0) {
+      const newSq = toSquare(file, newRank);
+      const blocked = miniState.pieces.some(p => p.square === newSq);
+      if (!blocked) {
+        pawn.square = newSq;
+        miniState.lastAIMoves.push(newSq);
+      }
+    }
+  }
+}
+
+// ——— Checkmate King AI: black king tries to escape ———
+function checkmateKingAI() {
+  const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+  if (!bk) return;
+
+  const occupied = {};
+  for (const p of miniState.pieces) {
+    if (p.square === bk.square) continue;
+    occupied[p.square] = p.color === 'black' ? 'friendly' : 'enemy';
+  }
+
+  let moves = getKingMoves(bk.square, occupied);
+
+  // Filter: can't move into check
+  moves = moves.filter(m => !wouldLeaveInCheck(bk, m, 'black'));
+
+  // Filter: can't move adjacent to white king
+  const wk = miniState.pieces.find(p => p.color === 'white' && p.type === 'K');
+  if (wk) {
+    const { file: wkf, rank: wkr } = toCoords(wk.square);
+    moves = moves.filter(m => {
+      const { file: mf, rank: mr } = toCoords(m);
+      return Math.abs(mf - wkf) > 1 || Math.abs(mr - wkr) > 1;
+    });
+  }
+
+  if (moves.length === 0) return; // checkmate or stalemate — handled elsewhere
+
+  // Always capture undefended queen if possible
+  const wq = miniState.pieces.find(p => p.color === 'white' && p.type === 'Q');
+  if (wq && moves.includes(wq.square)) {
+    if (wk) {
+      const { file: wkf, rank: wkr } = toCoords(wk.square);
+      const { file: qf, rank: qr } = toCoords(wq.square);
+      const defended = Math.abs(wkf - qf) <= 1 && Math.abs(wkr - qr) <= 1;
+      if (!defended) {
+        miniState.pieces = miniState.pieces.filter(p => p !== wq);
+        bk.square = wq.square;
+        miniState.lastAIMoves = [wq.square];
+        return;
+      }
+    }
+  }
+
+  // Score each escape move
+  let bestMove = moves[0];
+  let bestScore = -Infinity;
+
+  for (const m of moves) {
+    const { file: mf, rank: mr } = toCoords(m);
+    let score = 0;
+
+    // Prefer center
+    score -= (Math.abs(mf - 3.5) + Math.abs(mr - 3.5)) * 0.8;
+
+    // Stay away from queen
+    if (wq) {
+      const { file: qf, rank: qr } = toCoords(wq.square);
+      score += (Math.abs(mf - qf) + Math.abs(mr - qr)) * 0.3;
+    }
+
+    // Stay away from white king
+    if (wk) {
+      const { file: kf, rank: kr } = toCoords(wk.square);
+      score += (Math.abs(mf - kf) + Math.abs(mr - kr)) * 0.2;
+    }
+
+    // Avoid edges
+    if (mf === 0 || mf === 7 || mr === 0 || mr === 7) score -= 0.5;
+
+    // Randomness — keeps AI beatable for kids
+    score += Math.random() * 3;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = m;
+    }
+  }
+
+  bk.square = bestMove;
+  miniState.lastAIMoves = [bestMove];
+}
+
+// ——— Win / Loss / Stalemate detection ———
+function checkMiniWin() {
+  switch (miniState.subType) {
+    case 'pawn-hunter':
+    case 'queen-sweep':
+      return miniState.pieces.filter(p => p.color === 'black').length === 0;
+    case 'checkmate-king': {
+      const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+      return bk ? isMiniCheckmate(bk) : false;
+    }
+    default: return false;
+  }
+}
+
+function checkMiniLoss() {
+  switch (miniState.subType) {
+    case 'pawn-hunter': {
+      const promoted = miniState.pieces.find(p =>
+        p.color === 'black' && p.type === 'P' && toCoords(p.square).rank === 0
+      );
+      return promoted ? 'A pawn got through! Try again 💪' : null;
+    }
+    case 'checkmate-king': {
+      const hasQueen = miniState.pieces.some(p => p.color === 'white' && p.type === 'Q');
+      if (!hasQueen) return 'The enemy king captured your queen! Keep her defended next time 🛡️';
+      if (miniState.moveCount >= 50) return '50 moves reached! Try a more efficient approach 🧠';
+      return null;
+    }
+    default: return null;
+  }
+}
+
+function isMiniCheckmate(bk) {
+  // Must be in check first
+  if (!isMiniInCheck(bk.square, 'black')) return false;
+
+  // Can the king escape?
+  const occupied = {};
+  for (const p of miniState.pieces) {
+    if (p.square === bk.square) continue;
+    occupied[p.square] = p.color === 'black' ? 'friendly' : 'enemy';
+  }
+  const moves = getKingMoves(bk.square, occupied);
+  const wk = miniState.pieces.find(p => p.color === 'white' && p.type === 'K');
+
+  for (const m of moves) {
+    // Can't move adjacent to white king
+    if (wk) {
+      const { file: wkf, rank: wkr } = toCoords(wk.square);
+      const { file: mf, rank: mr } = toCoords(m);
+      if (Math.abs(mf - wkf) <= 1 && Math.abs(mr - wkr) <= 1) continue;
+    }
+
+    // Simulate and check if still in check
+    const tempPieces = miniState.pieces.map(p => ({...p}));
+    const tempKing = tempPieces.find(p => p.color === 'black' && p.type === 'K');
+    tempKing.square = m;
+    const capIdx = tempPieces.findIndex(p => p.square === m && p.color === 'white');
+    if (capIdx >= 0) tempPieces.splice(capIdx, 1);
+
+    if (!isTempInCheck(m, 'black', tempPieces)) return false; // can escape
+  }
+
+  return true; // checkmate!
+}
+
+function isMiniStalemate(bk) {
+  if (isMiniInCheck(bk.square, 'black')) return false; // not stalemate if in check
+
+  const occupied = {};
+  for (const p of miniState.pieces) {
+    if (p.square === bk.square) continue;
+    occupied[p.square] = p.color === 'black' ? 'friendly' : 'enemy';
+  }
+  const moves = getKingMoves(bk.square, occupied);
+  const wk = miniState.pieces.find(p => p.color === 'white' && p.type === 'K');
+
+  for (const m of moves) {
+    if (wk) {
+      const { file: wkf, rank: wkr } = toCoords(wk.square);
+      const { file: mf, rank: mr } = toCoords(m);
+      if (Math.abs(mf - wkf) <= 1 && Math.abs(mr - wkr) <= 1) continue;
+    }
+
+    const tempPieces = miniState.pieces.map(p => ({...p}));
+    const tempKing = tempPieces.find(p => p.color === 'black' && p.type === 'K');
+    tempKing.square = m;
+    const capIdx = tempPieces.findIndex(p => p.square === m && p.color === 'white');
+    if (capIdx >= 0) tempPieces.splice(capIdx, 1);
+
+    if (!isTempInCheck(m, 'black', tempPieces)) return false; // has a legal move
+  }
+
+  return true; // stalemate
+}
+
+// ——— Mini-game completion & failure overlays ———
+function completeMiniGame() {
+  const level = LEVELS[currentLevelId - 1];
+  const mc = miniState.moveCount;
+  const [t3, t2] = level.starThresholds;
+
+  let stars;
+  if (mc <= t3) stars = 3;
+  else if (mc <= t2) stars = 2;
+  else stars = 1;
+
+  // Save progress (keep best)
+  const prevStars = gameData[currentPlayer].stars[currentLevelId - 1];
+  if (stars > prevStars) {
+    gameData[currentPlayer].stars[currentLevelId - 1] = stars;
+    saveData();
+  }
+
+  sfxComplete();
+  createConfetti();
+
+  const msgs = COMPLETE_MESSAGES[stars];
+  document.getElementById('complete-title').textContent =
+    msgs[Math.floor(Math.random() * msgs.length)];
+
+  const moveWord = mc === 1 ? 'move' : 'moves';
+  document.getElementById('complete-msg').textContent =
+    'Cleared in ' + mc + ' ' + moveWord + '! ' + STAR_MESSAGES[stars];
+  document.getElementById('complete-msg').style.marginBottom = '28px';
+
+  // No tactic reveal for mini-games
+  const revealEl = document.getElementById('complete-reveal');
+  revealEl.textContent = '';
+  revealEl.classList.remove('visible');
+
+  // Stars
+  const starsContainer = document.getElementById('complete-stars');
+  starsContainer.innerHTML = '';
+  for (let i = 1; i <= 3; i++) {
+    const span = document.createElement('span');
+    span.className = 'complete-star ' + (i <= stars ? 'earned' : 'empty');
+    span.textContent = '★';
+    starsContainer.appendChild(span);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => span.classList.add('animate'));
+    });
+  }
+
+  // Buttons
+  const actions = document.getElementById('complete-actions');
+  actions.innerHTML = '';
+
+  const replayBtn = document.createElement('button');
+  replayBtn.className = 'btn btn-replay';
+  replayBtn.textContent = '↻ Replay';
+  replayBtn.onclick = () => { hideOverlay(); startLevel(currentLevelId); };
+  actions.appendChild(replayBtn);
+
+  if (currentLevelId < LEVELS.length) {
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'btn btn-next';
+    nextBtn.textContent = 'Next Level →';
+    nextBtn.onclick = () => { hideOverlay(); startLevel(currentLevelId + 1); };
+    actions.appendChild(nextBtn);
+  } else {
+    const mapBtn = document.createElement('button');
+    mapBtn.className = 'btn btn-map-return';
+    mapBtn.textContent = '🎓 All Done!';
+    mapBtn.onclick = () => { hideOverlay(); showScreen('map'); };
+    actions.appendChild(mapBtn);
+  }
+
+  document.getElementById('overlay-complete').classList.add('visible');
+}
+
+function failMiniGame(reason) {
+  sfxWrong();
+
+  document.getElementById('complete-title').textContent = 'Not quite! 💪';
+  document.getElementById('complete-msg').textContent = reason;
+  document.getElementById('complete-msg').style.marginBottom = '28px';
+
+  const revealEl = document.getElementById('complete-reveal');
+  revealEl.textContent = '';
+  revealEl.classList.remove('visible');
+
+  // No stars on fail
+  document.getElementById('complete-stars').innerHTML = '';
+
+  const actions = document.getElementById('complete-actions');
+  actions.innerHTML = '';
+
+  const retryBtn = document.createElement('button');
+  retryBtn.className = 'btn btn-next';
+  retryBtn.textContent = '↻ Try Again';
+  retryBtn.onclick = () => { hideOverlay(); startLevel(currentLevelId); };
+  actions.appendChild(retryBtn);
+
+  const mapBtn = document.createElement('button');
+  mapBtn.className = 'btn btn-replay';
+  mapBtn.textContent = 'Back to Map';
+  mapBtn.onclick = () => { hideOverlay(); showScreen('map'); };
+  actions.appendChild(mapBtn);
+
+  document.getElementById('overlay-complete').classList.add('visible');
+}
+
+function updateMiniProgress() {
+  const dotsContainer = document.getElementById('progress-dots');
+  dotsContainer.innerHTML = '';
+
+  let text = '';
+  switch (miniState.subType) {
+    case 'pawn-hunter': {
+      const left = miniState.pieces.filter(p => p.color === 'black').length;
+      text = '♟ ' + left + ' left · Move ' + miniState.moveCount;
+      break;
+    }
+    case 'queen-sweep': {
+      const left = miniState.pieces.filter(p => p.color === 'black').length;
+      text = '⚔ ' + left + ' left · Move ' + miniState.moveCount;
+      break;
+    }
+    case 'checkmate-king': {
+      const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+      const checkText = bk && isMiniInCheck(bk.square, 'black') ? ' · CHECK!' : '';
+      text = 'Move ' + miniState.moveCount + checkText;
+      break;
+    }
+  }
+
+  document.getElementById('progress-text').textContent = text;
 }
 
 
