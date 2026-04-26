@@ -639,7 +639,22 @@ html, body {
   font-size: 16px;
   font-weight: 500;
   color: #78716c;
-  margin-bottom: 28px;
+  margin-bottom: 12px;
+}
+
+.complete-reveal {
+  font-size: 15px;
+  font-weight: 600;
+  color: #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  line-height: 1.4;
+  display: none;
+}
+.complete-reveal.visible {
+  display: block;
 }
 
 .complete-actions {
@@ -880,6 +895,7 @@ html, body {
     <h2 class="complete-title" id="complete-title"></h2>
     <div class="complete-stars" id="complete-stars"></div>
     <p class="complete-msg" id="complete-msg"></p>
+    <p class="complete-reveal" id="complete-reveal"></p>
     <div class="complete-actions" id="complete-actions"></div>
   </div>
 </div>
@@ -1360,6 +1376,382 @@ const LEVELS = [
     ],
     instruction: 'The ultimate skewer — king in front, QUEEN behind! Your rook needs to get on the d-file above the king. When the king runs, the queen is yours. That\'s a game-winning move! 🗡️💰',
     theme: '#be123c'
+  },
+
+  // =========== PHASE 3d: Tactics — Discovered Attacks (Levels 29–32) ===========
+  {
+    id: 29,
+    name: 'Discovered!',
+    type: 'tap-discovered-target',
+    phase: 3,
+    piece: { type: 'N', square: 'c4' },
+    discoverer: { type: 'R', square: 'c1' },
+    blockers: [
+      { square: 'c7', type: 'Q' },
+      { square: 'e5', type: 'P' },
+      { square: 'a3', type: 'B' }
+    ],
+    instruction: 'A discovered attack is sneaky! Your knight is blocking the rook\'s view. When the knight jumps away, the rook reveals an attack on an enemy piece! Tap the enemy that\'s about to be in danger 💥',
+    theme: '#7c3aed'
+  },
+  {
+    id: 30,
+    name: 'Bishop Discovery',
+    type: 'tap-discovered-target',
+    phase: 3,
+    piece: { type: 'N', square: 'e5' },
+    discoverer: { type: 'B', square: 'b2' },
+    blockers: [
+      { square: 'g7', type: 'K' },
+      { square: 'h8', type: 'R' },
+      { square: 'a3', type: 'P' }
+    ],
+    instruction: 'Your bishop on b2 is hiding behind the knight! When the knight moves off the diagonal, the bishop\'s X-ray vision cuts straight through to an enemy. Which piece is in danger? 💥',
+    theme: '#059669'
+  },
+  {
+    id: 31,
+    name: 'Rook Discovery',
+    type: 'tap-discovered-target',
+    phase: 3,
+    piece: { type: 'B', square: 'e4' },
+    discoverer: { type: 'R', square: 'e1' },
+    blockers: [
+      { square: 'e8', type: 'K' },
+      { square: 'a4', type: 'Q' },
+      { square: 'h4', type: 'N' }
+    ],
+    instruction: 'Your rook is aiming up the e-file, but the bishop is in the way! Once the bishop slides off, the rook\'s line opens up. Which enemy piece gets hit? 💥',
+    theme: '#dc2626'
+  },
+  {
+    id: 32,
+    name: 'Queen Discovery',
+    type: 'tap-discovered-target',
+    phase: 3,
+    piece: { type: 'N', square: 'd5' },
+    discoverer: { type: 'Q', square: 'd1' },
+    blockers: [
+      { square: 'd8', type: 'R' },
+      { square: 'g4', type: 'B' },
+      { square: 'a1', type: 'P' }
+    ],
+    instruction: 'The queen is the ultimate discovered attacker — she strikes along files, ranks, AND diagonals! The knight on d5 is blocking her. When it jumps, which enemy gets blasted? 💥',
+    theme: '#b91c1c'
+  },
+
+  // =========== PHASE 4: Checkmate in 1 (Levels 33–40) ===========
+  {
+    id: 33,
+    name: 'Checkmate!',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'Q', square: 'c1' },
+    friendlies: [
+      { type: 'K', square: 'a1' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    instruction: 'Time for the ultimate goal — CHECKMATE! The enemy king is trapped behind its own pawns. Find the ONE square where your queen ends the game. The king must be in check with NO escape! ♚💀',
+    theme: '#dc2626'
+  },
+  {
+    id: 34,
+    name: 'Rook Mate',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'R', square: 'd4' },
+    friendlies: [
+      { type: 'K', square: 'b6' }
+    ],
+    blockers: [
+      { square: 'a8', type: 'K' }
+    ],
+    instruction: 'Your king controls the escape squares while the rook delivers the blow! Move the rook to a square that puts the enemy king in check — with nowhere to run 🏰',
+    theme: '#2563eb'
+  },
+  {
+    id: 35,
+    name: 'Smothered Mate',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'N', square: 'e5' },
+    friendlies: [],
+    blockers: [
+      { square: 'h8', type: 'K' },
+      { square: 'g8', type: 'R' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    instruction: 'The smothered mate is one of the most beautiful patterns in chess! The enemy king is trapped by its OWN pieces. Your knight just needs to find the perfect L-shaped jump to finish the job 🐴💀',
+    theme: '#7c3aed'
+  },
+  {
+    id: 36,
+    name: 'Queen Capture Mate',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'Q', square: 'b1' },
+    friendlies: [
+      { type: 'K', square: 'c8' }
+    ],
+    blockers: [
+      { square: 'a8', type: 'K' },
+      { square: 'a7', type: 'P' },
+      { square: 'b7', type: 'P' },
+      { square: 'c7', type: 'P' }
+    ],
+    instruction: 'Sometimes the checkmate move is a CAPTURE! The queen can take an enemy pawn and deliver checkmate at the same time. Find the square where capturing = checkmate 👑💀',
+    theme: '#be123c'
+  },
+  {
+    id: 37,
+    name: 'Rook Roller',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'R', square: 'a3' },
+    friendlies: [
+      { type: 'R', square: 'b7' }
+    ],
+    blockers: [
+      { square: 'e8', type: 'K' }
+    ],
+    instruction: 'Two rooks working together is called a "rook roller" — one cuts off escape, the other delivers check! Your rook on b7 blocks the 7th rank. Now slide the other rook in for the kill! 🏰🏰',
+    theme: '#0891b2'
+  },
+  {
+    id: 38,
+    name: 'Queen & King',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'Q', square: 'e6' },
+    friendlies: [
+      { type: 'K', square: 'f6' }
+    ],
+    blockers: [
+      { square: 'e8', type: 'K' },
+      { square: 'a2', type: 'R' },
+      { square: 'b8', type: 'N' }
+    ],
+    instruction: 'The queen and king make a deadly team! Your king controls the escape squares while the queen delivers check. Find the square that seals the deal 👑🤝♚',
+    theme: '#d97706'
+  },
+  {
+    id: 39,
+    name: 'Protected Mate',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'Q', square: 'a5' },
+    friendlies: [
+      { type: 'K', square: 'b6' }
+    ],
+    blockers: [
+      { square: 'a8', type: 'K' },
+      { square: 'b7', type: 'P' }
+    ],
+    instruction: 'Your king protects the queen\'s landing square! Move the queen to a spot where she checks the king AND your king has her back. The enemy king\'s own pawn seals its fate! 🛡️👑',
+    theme: '#059669'
+  },
+  {
+    id: 40,
+    name: 'Final Challenge',
+    type: 'tap-checkmate',
+    phase: 4,
+    piece: { type: 'R', square: 'h1' },
+    friendlies: [
+      { type: 'Q', square: 'e5' },
+      { type: 'K', square: 'g3' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'f8', type: 'B' },
+      { square: 'f7', type: 'P' }
+    ],
+    instruction: 'The final puzzle! Your queen controls the key escape squares, now your rook needs to deliver the finishing blow. Find the one move that makes it CHECKMATE. You\'ve got this! 🏆💀',
+    theme: '#f59e0b'
+  },
+
+  // =========== PHASE 5: Puzzle Master (Levels 41–48) ===========
+  // Mystery levels — the tactic type is NOT revealed!
+  // Kids must read the board, identify the tactic, and execute.
+  {
+    id: 41,
+    name: 'Puzzle #1',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'N', square: 'e5' },
+    friendlies: [
+      { type: 'K', square: 'c1' }
+    ],
+    blockers: [
+      { square: 'h8', type: 'K' },
+      { square: 'd8', type: 'Q' },
+      { square: 'c4', type: 'P' },
+      { square: 'g6', type: 'P' }
+    ],
+    answers: ['f7'],
+    reveal: 'Knight fork! Your knight checks the king AND attacks the queen — opponent can only save one! 🍴',
+    instruction: 'Study the board. Find the winning move! 🧩',
+    theme: '#7c3aed'
+  },
+  {
+    id: 42,
+    name: 'Puzzle #2',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'B', square: 'f2' },
+    friendlies: [
+      { type: 'K', square: 'a1' }
+    ],
+    blockers: [
+      { square: 'e5', type: 'K' },
+      { square: 'g7', type: 'R' },
+      { square: 'h4', type: 'P' }
+    ],
+    answers: ['d4'],
+    reveal: 'Bishop skewer! The bishop checks the king — when it moves, the rook behind is captured! 🗡️',
+    instruction: 'Study the board. Find the winning move! 🧩',
+    theme: '#059669'
+  },
+  {
+    id: 43,
+    name: 'Puzzle #3',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'R', square: 'd3' },
+    friendlies: [
+      { type: 'K', square: 'f2' }
+    ],
+    blockers: [
+      { square: 'h8', type: 'K' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' },
+      { square: 'a3', type: 'Q' },
+      { square: 'e3', type: 'N' }
+    ],
+    answers: ['d8'],
+    reveal: 'Back rank checkmate! The king is trapped behind its own pawns — checkmate always beats capturing pieces! ♚💀',
+    instruction: 'So many pieces to capture... but is there something even better? 🧩',
+    theme: '#dc2626'
+  },
+  {
+    id: 44,
+    name: 'Puzzle #4',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'Q', square: 'h3' },
+    friendlies: [
+      { type: 'K', square: 'h1' }
+    ],
+    blockers: [
+      { square: 'd4', type: 'K' },
+      { square: 'a7', type: 'R' },
+      { square: 'd3', type: 'P' },
+      { square: 'g4', type: 'N' }
+    ],
+    answers: ['e3'],
+    reveal: 'Queen skewer! Check the king, and when it moves, the rook behind is yours! 🗡️',
+    instruction: 'Study the board. Find the winning move! 🧩',
+    theme: '#0891b2'
+  },
+  {
+    id: 45,
+    name: 'Puzzle #5',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'N', square: 'b5' },
+    friendlies: [
+      { type: 'K', square: 'h1' }
+    ],
+    blockers: [
+      { square: 'e8', type: 'K' },
+      { square: 'a8', type: 'Q' },
+      { square: 'd6', type: 'R' },
+      { square: 'a3', type: 'P' }
+    ],
+    answers: ['c7'],
+    reveal: 'Knight fork! The knight checks the king AND attacks the queen — you win the queen! 🍴👑',
+    instruction: 'There\'s a juicy rook to capture... but is there a better move? 🧩',
+    theme: '#7c3aed'
+  },
+  {
+    id: 46,
+    name: 'Puzzle #6',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'N', square: 'e4' },
+    friendlies: [
+      { type: 'R', square: 'e1' },
+      { type: 'K', square: 'a1' }
+    ],
+    blockers: [
+      { square: 'e8', type: 'Q' },
+      { square: 'g8', type: 'R' },
+      { square: 'c3', type: 'B' },
+      { square: 'h8', type: 'K' }
+    ],
+    answers: ['f6'],
+    reveal: 'Discovered attack! Your knight moved and revealed the rook\'s attack on the queen — double threat! 💥',
+    instruction: 'Your knight is blocking something... find the move that unleashes TWO attacks! 🧩',
+    theme: '#b91c1c'
+  },
+  {
+    id: 47,
+    name: 'Puzzle #7',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'Q', square: 'd5' },
+    friendlies: [
+      { type: 'N', square: 'f6' },
+      { type: 'K', square: 'a1' }
+    ],
+    blockers: [
+      { square: 'h8', type: 'K' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' },
+      { square: 'b5', type: 'B' },
+      { square: 'd2', type: 'R' }
+    ],
+    answers: ['g8'],
+    reveal: 'Checkmate! The queen delivers mate — protected by the knight. The king has nowhere to run! ♚💀',
+    instruction: 'Big pieces to capture... but look at the enemy king. Is it safe? 🧩',
+    theme: '#d97706'
+  },
+  {
+    id: 48,
+    name: 'Final Boss',
+    type: 'tap-best-move',
+    phase: 5,
+    mystery: true,
+    piece: { type: 'Q', square: 'a1' },
+    friendlies: [
+      { type: 'R', square: 'g1' },
+      { type: 'K', square: 'h2' }
+    ],
+    blockers: [
+      { square: 'g8', type: 'K' },
+      { square: 'a6', type: 'R' },
+      { square: 'e1', type: 'B' },
+      { square: 'f7', type: 'P' },
+      { square: 'g7', type: 'P' },
+      { square: 'h7', type: 'P' }
+    ],
+    answers: ['g7'],
+    reveal: 'CHECKMATE! You chose a tiny pawn over a rook and bishop — because checkmate ends the game! That\'s grandmaster thinking! 🏆♚💀',
+    instruction: 'A rook AND a bishop to capture — but is there something the opponent won\'t survive? 🧩',
+    theme: '#f59e0b'
   }
 ];
 
@@ -1415,6 +1807,11 @@ function getReachableSquares(level) {
   // Build occupied map: square → 'friendly' | 'enemy'
   const occupied = {};
   occupied[level.piece.square] = 'friendly';
+  // Discoverer and friendly pieces block movement (can't move through them)
+  if (level.discoverer) occupied[level.discoverer.square] = 'friendly';
+  if (level.friendlies) {
+    for (const f of level.friendlies) occupied[f.square] = 'friendly';
+  }
   for (const b of level.blockers) {
     occupied[b.square] = 'enemy';
   }
@@ -1698,9 +2095,184 @@ function computeCorrectSquares(level) {
       return skewerSquares;
     }
 
+    case 'tap-discovered-target': {
+      // Correct = enemy pieces newly attacked when the front piece moves away
+      // Compare discoverer's attacks WITH vs WITHOUT the front piece blocking
+      const discSq = level.discoverer.square;
+      const mainSq = level.piece.square;
+
+      // With front piece blocking
+      const occWith = {};
+      occWith[mainSq] = 'friendly';
+      occWith[discSq] = 'friendly';
+      for (const b of level.blockers) occWith[b.square] = 'enemy';
+      const attacksWith = getMovesForPiece(level.discoverer.type, discSq, occWith);
+
+      // Without front piece (it moved away)
+      const occWithout = {};
+      occWithout[discSq] = 'friendly';
+      for (const b of level.blockers) occWithout[b.square] = 'enemy';
+      const attacksWithout = getMovesForPiece(level.discoverer.type, discSq, occWithout);
+
+      // Newly attacked = in "without" but not in "with", AND has an enemy on it
+      return attacksWithout.filter(sq =>
+        !attacksWith.includes(sq) && level.blockers.some(b => b.square === sq)
+      );
+    }
+
+    case 'tap-checkmate': {
+      // Correct = squares where moving our piece delivers checkmate
+      const enemyKing = level.blockers.find(b => b.type === 'K');
+      if (!enemyKing) return [];
+
+      const checkmateSquares = [];
+      for (const sq of reachable) {
+        if (sq === enemyKing.square) continue; // can't "capture" the king
+        if (_isCheckmate(level, sq, enemyKing)) {
+          checkmateSquares.push(sq);
+        }
+      }
+      return checkmateSquares;
+    }
+
+    case 'tap-best-move': {
+      // Correct = hardcoded answer squares (mystery puzzles)
+      return level.answers || [];
+    }
+
     default:
       return reachable;
   }
+}
+
+/* =============================================================
+   CHECKMATE DETECTION — used by tap-checkmate levels
+   ============================================================= */
+function _isSquareAttackedBy(square, attackers, obstacles) {
+  // Check if any attacker can reach the given square
+  for (const att of attackers) {
+    const occupied = {};
+    for (const a of attackers) {
+      if (a.square !== att.square) occupied[a.square] = 'friendly';
+    }
+    for (const o of obstacles) occupied[o.square] = 'enemy';
+    const moves = getMovesForPiece(att.type, att.square, occupied);
+    if (moves.includes(square)) return true;
+  }
+  return false;
+}
+
+function _getSquaresBetween(sq1, sq2) {
+  // Squares on a line between sq1 and sq2 (exclusive)
+  const { file: f1, rank: r1 } = toCoords(sq1);
+  const { file: f2, rank: r2 } = toCoords(sq2);
+  const df = Math.sign(f2 - f1), dr = Math.sign(r2 - r1);
+  if (df === 0 && dr === 0) return [];
+  if (df !== 0 && dr !== 0 && Math.abs(f2 - f1) !== Math.abs(r2 - r1)) return [];
+  const between = [];
+  let f = f1 + df, r = r1 + dr;
+  while (f !== f2 || r !== r2) {
+    between.push(toSquare(f, r));
+    f += df; r += dr;
+  }
+  return between;
+}
+
+function _isCheckmate(level, moveTo, enemyKing) {
+  // Build position after our piece moves to moveTo
+  const ourPieces = [{ type: level.piece.type, square: moveTo }];
+  if (level.friendlies) ourPieces.push(...level.friendlies);
+  const enemyPieces = level.blockers.filter(b => b.square !== moveTo); // captured piece removed
+  const kingPos = enemyKing.square;
+
+  // 1. Is the enemy king in check?
+  if (!_isSquareAttackedBy(kingPos, ourPieces, enemyPieces)) return false;
+
+  // 2. Can the king escape to any adjacent square?
+  const { file: kf, rank: kr } = toCoords(kingPos);
+  const kingDeltas = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  for (const [df, dr] of kingDeltas) {
+    const nf = kf + df, nr = kr + dr;
+    if (!isOnBoard(nf, nr)) continue;
+    const escapeSq = toSquare(nf, nr);
+    // Can't go to square with own (enemy's own) piece
+    if (enemyPieces.some(e => e.square === escapeSq && e.type !== 'K')) continue;
+    const enemyWithoutKing = enemyPieces.filter(e => e.type !== 'K');
+    // If OUR piece is on the escape square, king can capture if not defended
+    const ourPieceThere = ourPieces.find(p => p.square === escapeSq);
+    if (ourPieceThere) {
+      const ourWithout = ourPieces.filter(p => p.square !== escapeSq);
+      if (ourWithout.length === 0 || !_isSquareAttackedBy(escapeSq, ourWithout, enemyWithoutKing)) {
+        return false; // king captures undefended piece — NOT checkmate
+      }
+      continue; // square defended, king can't capture
+    }
+    // Empty square — check if attacked by us
+    if (!_isSquareAttackedBy(escapeSq, ourPieces, enemyWithoutKing)) return false;
+  }
+
+  // 3. Can any enemy piece capture the checker or block the check?
+  const checkers = ourPieces.filter(p => {
+    const occ = {};
+    for (const op of ourPieces) if (op.square !== p.square) occ[op.square] = 'friendly';
+    for (const ep of enemyPieces) occ[ep.square] = 'enemy';
+    return getMovesForPiece(p.type, p.square, occ).includes(kingPos);
+  });
+
+  // Double check — only king can move (already checked above)
+  if (checkers.length >= 2) return true;
+
+  const checker = checkers[0];
+  const savingSquares = [checker.square, ..._getSquaresBetween(checker.square, kingPos)];
+
+  for (const enemy of enemyPieces) {
+    if (enemy.type === 'K') continue;
+    const occ = {};
+    for (const op of ourPieces) occ[op.square] = 'enemy';
+    for (const ep of enemyPieces) {
+      if (ep.square !== enemy.square && ep.type !== 'K') occ[ep.square] = 'friendly';
+    }
+    let moves;
+    if (enemy.type === 'P') {
+      // Pawns need special handling: diagonal captures only where a piece exists,
+      // forward pushes only to empty squares
+      moves = [];
+      const attacks = getPawnAttacks(enemy.square, 'black');
+      // Diagonal captures — only valid if our piece is there to capture
+      for (const a of attacks) {
+        if (ourPieces.some(p => p.square === a)) moves.push(a);
+      }
+      // Forward push — one square toward rank 1 if empty
+      const { file: pf, rank: pr } = toCoords(enemy.square);
+      const fwdRank = pr - 1; // black moves toward rank 1
+      if (fwdRank >= 0) {
+        const fwdSq = toSquare(pf, fwdRank);
+        const fwdOccupied = ourPieces.some(p => p.square === fwdSq) ||
+                            enemyPieces.some(p => p.square === fwdSq);
+        if (!fwdOccupied) moves.push(fwdSq);
+      }
+    } else {
+      moves = getMovesForPiece(enemy.type, enemy.square, occ);
+    }
+    for (const ss of savingSquares) {
+      if (moves.includes(ss)) {
+        // Simulate the save: enemy moves to saving square
+        let ourAfter = [...ourPieces];
+        const enemiesAfter = enemyPieces.filter(e => e !== enemy);
+        enemiesAfter.push({ type: enemy.type, square: ss });
+        if (ss === checker.square) {
+          // Enemy captures the checker — remove it
+          ourAfter = ourAfter.filter(p => p.square !== checker.square);
+        }
+        // Is king STILL in check after the save?
+        if (!_isSquareAttackedBy(kingPos, ourAfter, enemiesAfter)) {
+          return false; // save works — NOT checkmate
+        }
+      }
+    }
+  }
+
+  return true; // checkmate!
 }
 
 
@@ -1818,6 +2390,21 @@ function renderLevelGrid() {
       div.className = 'phase-divider';
       div.textContent = '📌 Pins & Skewers';
       grid.appendChild(div);
+    } else if (level.id === 29) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '💥 Discovered Attacks';
+      grid.appendChild(div);
+    } else if (level.id === 33) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '♚ Checkmate in 1';
+      grid.appendChild(div);
+    } else if (level.id === 41) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '🧩 Puzzle Master';
+      grid.appendChild(div);
     }
 
     const stars = gameData[currentPlayer].stars[level.id - 1];
@@ -1844,9 +2431,13 @@ function renderLevelGrid() {
       starsHTML = '<span class="star-empty">☆</span>'.repeat(3);
     }
 
+    const pieceIcon = level.mystery
+      ? '🧩'
+      : (level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[level.piece.type];
+
     card.innerHTML = `
       <div class="level-number">${level.id}</div>
-      <div class="level-piece-icon">${(level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[level.piece.type]}</div>
+      <div class="level-piece-icon">${pieceIcon}</div>
       <div class="level-name">${level.name}</div>
       <div class="level-stars">${starsHTML}</div>
     `;
@@ -1893,9 +2484,17 @@ function renderBoard(level) {
 
   // Build piece map for quick lookup
   const pieceMap = {};
-  pieceMap[level.piece.square] = { type: level.piece.type, isMain: true };
+  pieceMap[level.piece.square] = { type: level.piece.type, isMain: true, isFriendly: true };
+  if (level.discoverer) {
+    pieceMap[level.discoverer.square] = { type: level.discoverer.type, isMain: false, isFriendly: true };
+  }
+  if (level.friendlies) {
+    for (const f of level.friendlies) {
+      pieceMap[f.square] = { type: f.type, isMain: false, isFriendly: true };
+    }
+  }
   for (const b of level.blockers) {
-    pieceMap[b.square] = { type: b.type, isMain: false };
+    pieceMap[b.square] = { type: b.type, isMain: false, isFriendly: false };
   }
 
   // Render 64 squares (a8=top-left to h1=bottom-right)
@@ -1921,11 +2520,13 @@ function renderBoard(level) {
         const isPhase2Plus = level.phase >= 2;
         if (pieceMap[sq].isMain) {
           span.className = 'piece ' + (level.perspective === 'enemy' ? 'enemy-main' : 'main-piece');
-          // Enemy perspective: main piece is black; otherwise white
           span.textContent = (level.perspective === 'enemy' ? BLACK_PIECES : WHITE_PIECES)[pieceMap[sq].type];
+        } else if (pieceMap[sq].isFriendly) {
+          // Discoverer / friendly pieces — show as white with main-piece styling
+          span.className = 'piece main-piece';
+          span.textContent = WHITE_PIECES[pieceMap[sq].type];
         } else {
           span.className = 'piece ' + (isPhase2Plus ? 'enemy-piece' : 'blocker-piece');
-          // Blockers/enemies are always black; except in enemy perspective where they're white (player's pieces blocking)
           span.textContent = (level.perspective === 'enemy' ? WHITE_PIECES : BLACK_PIECES)[pieceMap[sq].type];
         }
         div.appendChild(span);
@@ -1950,7 +2551,7 @@ function renderBoard(level) {
   renderCoordinateLabels();
 
   // Show candidate dots for levels where kids pick among reachable squares
-  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square'].includes(level.type)) {
+  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square', 'tap-checkmate', 'tap-best-move'].includes(level.type)) {
     const allReachable = getReachableSquares(level);
     for (const sq of allReachable) {
       const el = document.querySelector(`.square[data-square="${sq}"]`);
@@ -2010,19 +2611,21 @@ function handleSquareTap(sq, el) {
   const level = LEVELS[currentLevelId - 1];
   const type = level.type || 'tap-reachable';
 
-  // Ignore taps on the main piece's square
+  // Ignore taps on the main piece's square and friendly pieces
   if (sq === level.piece.square) return;
+  if (level.discoverer && sq === level.discoverer.square) return;
+  if (level.friendlies && level.friendlies.some(f => f.square === sq)) return;
 
   // Ignore already-found squares
   if (foundSquares.includes(sq)) return;
 
   // Filter irrelevant taps so kids don't get penalized for tapping empty squares
-  const captureTypes = ['tap-captures', 'tap-undefended', 'tap-safe-captures', 'tap-best-capture', 'tap-pinned'];
+  const captureTypes = ['tap-captures', 'tap-undefended', 'tap-safe-captures', 'tap-best-capture', 'tap-pinned', 'tap-discovered-target'];
   if (captureTypes.includes(type) && !correctSquares.includes(sq)) {
     const hasEnemy = level.blockers.some(b => b.square === sq);
     if (!hasEnemy) return; // ignore empty square taps — only enemy piece taps count
   }
-  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square'].includes(type) && !correctSquares.includes(sq)) {
+  if (['tap-safe-moves', 'tap-fork', 'tap-skewer-square', 'tap-checkmate', 'tap-best-move'].includes(type) && !correctSquares.includes(sq)) {
     const reachable = getReachableSquares(level);
     if (!reachable.includes(sq)) return; // ignore non-reachable squares
   }
@@ -2098,10 +2701,24 @@ function completeLevel() {
   createConfetti();
 
   // Show overlay
+  const level = LEVELS[currentLevelId - 1];
   const msgs = COMPLETE_MESSAGES[stars];
   document.getElementById('complete-title').textContent =
     msgs[Math.floor(Math.random() * msgs.length)];
   document.getElementById('complete-msg').textContent = STAR_MESSAGES[stars];
+
+  // Show tactic reveal for mystery levels
+  const revealEl = document.getElementById('complete-reveal');
+  if (level.reveal) {
+    revealEl.textContent = level.reveal;
+    revealEl.classList.add('visible');
+    // Restore normal msg margin when reveal is present
+    document.getElementById('complete-msg').style.marginBottom = '12px';
+  } else {
+    revealEl.textContent = '';
+    revealEl.classList.remove('visible');
+    document.getElementById('complete-msg').style.marginBottom = '28px';
+  }
 
   // Stars
   const starsContainer = document.getElementById('complete-stars');
