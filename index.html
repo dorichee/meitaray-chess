@@ -2173,6 +2173,137 @@ const LEVELS = [
       '⚡ Bishops are fast on open boards — use long diagonal sweeps to cover ground quickly'
     ],
     theme: '#10b981'
+  },
+
+  // =========== PHASE 8: Battle Arena (Levels 63–67) ===========
+  // The opponent fights back! Bridge between puzzles and real chess.
+  {
+    id: 63,
+    name: 'Knight Duel',
+    type: 'mini-game',
+    subType: 'battle',
+    phase: 8,
+    mapIcon: '⚔️',
+    startPieces: [
+      { type: 'N', square: 'c3', color: 'white' },
+      { type: 'P', square: 'd2', color: 'white' },
+      { type: 'P', square: 'b2', color: 'white' },
+      { type: 'N', square: 'f6', color: 'black' },
+      { type: 'P', square: 'e7', color: 'black' },
+      { type: 'P', square: 'g7', color: 'black' }
+    ],
+    starThresholds: [6, 10],
+    instruction: 'Your first REAL fight! The enemy knight fights back — capture all enemy pieces ⚔️',
+    strategyTips: [
+      '⚔️ This time the opponent ATTACKS you too! Think about where the enemy knight can jump',
+      '🐴 Knights are tricky — try to attack from a square the enemy knight can\'t reach',
+      '♟ Pawns protect diagonally — use yours as shields!'
+    ],
+    theme: '#ef4444'
+  },
+  {
+    id: 64,
+    name: 'Rook Rumble',
+    type: 'mini-game',
+    subType: 'battle',
+    phase: 8,
+    mapIcon: '🏰',
+    startPieces: [
+      { type: 'R', square: 'a1', color: 'white' },
+      { type: 'P', square: 'b2', color: 'white' },
+      { type: 'P', square: 'd2', color: 'white' },
+      { type: 'P', square: 'f2', color: 'white' },
+      { type: 'R', square: 'h8', color: 'black' },
+      { type: 'P', square: 'c7', color: 'black' },
+      { type: 'P', square: 'e7', color: 'black' },
+      { type: 'P', square: 'g7', color: 'black' }
+    ],
+    starThresholds: [8, 14],
+    instruction: 'Rook vs Rook! Control the open lines and capture all enemy pieces 🏰⚔️',
+    strategyTips: [
+      '🏰 Rooks are powerful on OPEN files and ranks — lines with no pawns blocking',
+      '🛡️ Don\'t put your rook where the enemy rook can capture it for free!'
+    ],
+    theme: '#3b82f6'
+  },
+  {
+    id: 65,
+    name: 'Pawn Wars',
+    type: 'mini-game',
+    subType: 'pawn-race',
+    phase: 8,
+    mapIcon: '♟',
+    startPieces: [
+      { type: 'P', square: 'a2', color: 'white' },
+      { type: 'P', square: 'c2', color: 'white' },
+      { type: 'P', square: 'e2', color: 'white' },
+      { type: 'P', square: 'g2', color: 'white' },
+      { type: 'P', square: 'b7', color: 'black' },
+      { type: 'P', square: 'd7', color: 'black' },
+      { type: 'P', square: 'f7', color: 'black' },
+      { type: 'P', square: 'h7', color: 'black' }
+    ],
+    starThresholds: [8, 14],
+    instruction: 'Race your pawns to the other side! First to reach the end wins 🏁',
+    strategyTips: [
+      '♙ Pawns move forward but capture DIAGONALLY — block enemy pawns by standing in front of them',
+      '🏁 You don\'t need to capture everything — just get ONE pawn to the other side!',
+      '⚡ Passed pawns (no enemy pawn blocking) are your best runners!'
+    ],
+    theme: '#f59e0b'
+  },
+  {
+    id: 66,
+    name: 'Power Up',
+    type: 'mini-game',
+    subType: 'battle',
+    phase: 8,
+    mapIcon: '💪',
+    startPieces: [
+      { type: 'K', square: 'e1', color: 'white' },
+      { type: 'Q', square: 'd1', color: 'white' },
+      { type: 'R', square: 'a1', color: 'white' },
+      { type: 'N', square: 'g1', color: 'white' },
+      { type: 'K', square: 'e8', color: 'black' },
+      { type: 'R', square: 'a8', color: 'black' },
+      { type: 'B', square: 'c8', color: 'black' }
+    ],
+    starThresholds: [14, 22],
+    instruction: 'You have MORE pieces! Use your army to corner and CHECKMATE the enemy king 💪👑',
+    strategyTips: [
+      '💪 You have a BIG advantage — don\'t trade pieces! Use your extra pieces to attack',
+      '👑 Remember King Hunt: push the enemy king to the edge, then deliver checkmate',
+      '🛡️ Keep your king safe! Even though you\'re winning, a surprise check can ruin everything',
+      '⚠️ Watch for stalemate — don\'t trap the enemy king with NO legal moves unless it\'s checkmate!'
+    ],
+    theme: '#059669'
+  },
+  {
+    id: 67,
+    name: 'Fair Fight',
+    type: 'mini-game',
+    subType: 'battle',
+    phase: 8,
+    mapIcon: '🏆',
+    startPieces: [
+      { type: 'K', square: 'e1', color: 'white' },
+      { type: 'R', square: 'a1', color: 'white' },
+      { type: 'N', square: 'b1', color: 'white' },
+      { type: 'B', square: 'f1', color: 'white' },
+      { type: 'K', square: 'e8', color: 'black' },
+      { type: 'R', square: 'h8', color: 'black' },
+      { type: 'N', square: 'g8', color: 'black' },
+      { type: 'B', square: 'c8', color: 'black' }
+    ],
+    starThresholds: [16, 26],
+    instruction: 'EQUAL pieces! Outplay the opponent — capture their pieces or deliver checkmate 🏆⚔️',
+    strategyTips: [
+      '🧠 With equal pieces, tactics matter MORE — look for forks, pins, and skewers you learned!',
+      '⚔️ Try to WIN material first (capture their pieces for free), then convert the advantage',
+      '🛡️ Before each move, ask: "Can the opponent capture my piece if I put it there?"',
+      '👑 When you have more material, trade pieces to simplify — then go for checkmate!'
+    ],
+    theme: '#7c3aed'
   }
 ];
 
@@ -2311,15 +2442,16 @@ function getPawnAttacks(sq, color) {
   return attacks;
 }
 
-// Get all moves for a piece given an occupied map (for attack/defense calculation)
-function getMovesForPiece(type, square, occupied) {
+// Get all ATTACK squares for a piece (for check/defense calculation)
+// color param needed for pawn direction — defaults to 'black' for backward compat
+function getMovesForPiece(type, square, occupied, color) {
   switch (type) {
     case 'N': return getKnightMoves(square, occupied);
     case 'K': return getKingMoves(square, occupied);
     case 'R': return getSlidingMoves(square, occupied, [[0,1],[0,-1],[1,0],[-1,0]]);
     case 'B': return getSlidingMoves(square, occupied, [[1,1],[1,-1],[-1,1],[-1,-1]]);
     case 'Q': return getSlidingMoves(square, occupied, [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]);
-    case 'P': return getPawnAttacks(square, 'black');
+    case 'P': return getPawnAttacks(square, color || 'black');
     default: return [];
   }
 }
@@ -2909,6 +3041,11 @@ function renderLevelGrid() {
       div.className = 'phase-divider';
       div.textContent = '🎮 Mini-Games';
       grid.appendChild(div);
+    } else if (level.id === 63) {
+      const div = document.createElement('div');
+      div.className = 'phase-divider';
+      div.textContent = '⚔️ Battle Arena';
+      grid.appendChild(div);
     }
 
     const stars = gameData[currentPlayer].stars[level.id - 1];
@@ -3454,12 +3591,13 @@ function renderMiniGameBoard() {
   const pieceMap = {};
   for (const p of miniState.pieces) pieceMap[p.square] = p;
 
-  // Check if black king is in check (for checkmate-king mode)
+  // Check if any king is in check (for games with kings)
   let blackKingInCheck = false;
-  if (miniState.subType === 'checkmate-king') {
-    const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
-    if (bk) blackKingInCheck = isMiniInCheck(bk.square, 'black');
-  }
+  let whiteKingInCheck = false;
+  const bkRender = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+  const wkRender = miniState.pieces.find(p => p.color === 'white' && p.type === 'K');
+  if (bkRender) blackKingInCheck = isMiniInCheck(bkRender.square, 'black');
+  if (wkRender) whiteKingInCheck = isMiniInCheck(wkRender.square, 'white');
 
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
@@ -3491,8 +3629,11 @@ function renderMiniGameBoard() {
         div.classList.add('mg-last-move');
       }
 
-      // Check indicator on black king
+      // Check indicator on kings
       if (blackKingInCheck && pieceMap[sq] && pieceMap[sq].color === 'black' && pieceMap[sq].type === 'K') {
+        div.classList.add('mg-check');
+      }
+      if (whiteKingInCheck && pieceMap[sq] && pieceMap[sq].color === 'white' && pieceMap[sq].type === 'K') {
         div.classList.add('mg-check');
       }
 
@@ -3563,12 +3704,14 @@ function getMiniLegalMoves(piece) {
     case 'Q': moves = getSlidingMoves(piece.square, occupied, [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]); break;
     case 'R': moves = getSlidingMoves(piece.square, occupied, [[0,1],[0,-1],[1,0],[-1,0]]); break;
     case 'B': moves = getSlidingMoves(piece.square, occupied, [[1,1],[1,-1],[-1,1],[-1,-1]]); break;
+    case 'P': moves = getMiniPawnMoves(piece, occupied); break;
     default: moves = [];
   }
 
-  // Filter: can't leave own king in check (relevant for checkmate-king)
-  if (miniState.subType === 'checkmate-king') {
-    moves = moves.filter(m => !wouldLeaveInCheck(piece, m, 'white'));
+  // Filter: can't leave own king in check (for any game with kings)
+  const hasOwnKing = miniState.pieces.some(p => p.color === piece.color && p.type === 'K');
+  if (hasOwnKing) {
+    moves = moves.filter(m => !wouldLeaveInCheck(piece, m, piece.color));
   }
 
   // For king: can't move adjacent to enemy king
@@ -3580,6 +3723,39 @@ function getMiniLegalMoves(piece) {
         const { file: mf, rank: mr } = toCoords(m);
         return Math.abs(mf - ekf) > 1 || Math.abs(mr - ekr) > 1;
       });
+    }
+  }
+
+  return moves;
+}
+
+// Pawn movement for mini-games: forward + diagonal captures
+function getMiniPawnMoves(piece, occupied) {
+  const { file, rank } = toCoords(piece.square);
+  const dir = piece.color === 'white' ? 1 : -1;
+  const startRank = piece.color === 'white' ? 1 : 6;
+  const moves = [];
+
+  // Forward 1
+  if (isOnBoard(file, rank + dir)) {
+    const fwd1 = toSquare(file, rank + dir);
+    if (!occupied[fwd1]) {
+      moves.push(fwd1);
+      // Forward 2 from starting rank
+      if (rank === startRank && isOnBoard(file, rank + dir * 2)) {
+        const fwd2 = toSquare(file, rank + dir * 2);
+        if (!occupied[fwd2]) moves.push(fwd2);
+      }
+    }
+  }
+
+  // Diagonal captures
+  for (const df of [-1, 1]) {
+    const cf = file + df;
+    const cr = rank + dir;
+    if (isOnBoard(cf, cr)) {
+      const csq = toSquare(cf, cr);
+      if (occupied[csq] === 'enemy') moves.push(csq);
     }
   }
 
@@ -3617,7 +3793,7 @@ function isTempInCheck(kingSq, kingColor, pieces) {
       if (p.square === enemy.square) continue;
       occ[p.square] = p.color === enemy.color ? 'friendly' : 'enemy';
     }
-    const attacks = getMovesForPiece(enemy.type, enemy.square, occ);
+    const attacks = getMovesForPiece(enemy.type, enemy.square, occ, enemy.color);
     if (attacks.includes(kingSq)) return true;
   }
   return false;
@@ -3640,6 +3816,15 @@ function executeMiniPlayerMove(targetSq) {
   miniState.moveCount++;
   miniState.lastAIMoves = [];
 
+  // Pawn promotion (battle mode — becomes queen immediately)
+  if (piece.type === 'P' && miniState.subType === 'battle') {
+    const { rank } = toCoords(targetSq);
+    if ((piece.color === 'white' && rank === 7) || (piece.color === 'black' && rank === 0)) {
+      piece.type = 'Q';
+      sfxComplete();
+    }
+  }
+
   // Check win
   if (checkMiniWin()) {
     gameActive = false;
@@ -3648,14 +3833,15 @@ function executeMiniPlayerMove(targetSq) {
     return;
   }
 
-  // Check stalemate (checkmate-king: after player move, before AI)
-  if (miniState.subType === 'checkmate-king') {
-    const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
-    if (bk && isMiniStalemate(bk)) {
+  // Check stalemate (for games with kings: after player move, before AI)
+  const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+  if (bk) {
+    const inCheck = isMiniInCheck(bk.square, 'black');
+    if (!inCheck && !hasAnyLegalMoves('black')) {
       gameActive = false;
       renderMiniGameBoard();
       setTimeout(() => failMiniGame(
-        'Stalemate! The enemy king has no legal moves but isn\'t in check — that\'s a draw. Be careful not to trap the king!'
+        'Stalemate! The enemy has no legal moves but isn\'t in check — that\'s a draw. Be careful not to trap them!'
       ), 600);
       return;
     }
@@ -3690,6 +3876,8 @@ function executeMiniAI() {
   switch (miniState.subType) {
     case 'pawn-hunter': return pawnHunterAI();
     case 'checkmate-king': return checkmateKingAI();
+    case 'battle': return battleAI();
+    case 'pawn-race': return pawnRaceAI();
   }
 }
 
@@ -3811,6 +3999,135 @@ function checkmateKingAI() {
   miniState.lastAIMoves = [bestMove];
 }
 
+// ——— Battle AI: general-purpose opponent that attacks, captures, defends ———
+function battleAI() {
+  const blackPieces = miniState.pieces.filter(p => p.color === 'black');
+  if (blackPieces.length === 0) return;
+
+  let bestPiece = null;
+  let bestMove = null;
+  let bestScore = -Infinity;
+
+  for (const piece of blackPieces) {
+    const moves = getMiniLegalMoves(piece);
+
+    for (const move of moves) {
+      let score = 0;
+
+      // Capture value — strong incentive
+      const target = miniState.pieces.find(p => p.square === move && p.color === 'white');
+      if (target) score += PIECE_VALUES[target.type] * 10;
+
+      // Safety: simulate the move, check if destination is attacked
+      const afterPieces = miniState.pieces.map(p => ({...p}));
+      const movedP = afterPieces.find(p =>
+        p.square === piece.square && p.color === piece.color && p.type === piece.type
+      );
+      movedP.square = move;
+      const ci = afterPieces.findIndex(p => p.square === move && p.color === 'white' && p !== movedP);
+      if (ci >= 0) afterPieces.splice(ci, 1);
+
+      if (isTempInCheck(move, 'black', afterPieces)) {
+        score -= PIECE_VALUES[piece.type] * 7; // penalty for hanging piece
+      }
+
+      // Escape danger — reward moving attacked piece to safety
+      if (isTempInCheck(piece.square, 'black', miniState.pieces)) {
+        if (!isTempInCheck(move, 'black', afterPieces)) {
+          score += PIECE_VALUES[piece.type] * 4;
+        }
+      }
+
+      // Pawn advancement
+      if (piece.type === 'P') {
+        const { rank } = toCoords(move);
+        score += (6 - rank) * 1.5; // closer to rank 0 = better for black
+      }
+
+      // Center control (slight bonus)
+      const { file: mf, rank: mr } = toCoords(move);
+      score += (3.5 - Math.abs(mf - 3.5)) * 0.3;
+      score += (3.5 - Math.abs(mr - 3.5)) * 0.3;
+
+      // Randomness — keeps AI beatable by kids
+      score += Math.random() * 3;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestPiece = piece;
+        bestMove = move;
+      }
+    }
+  }
+
+  if (!bestPiece || !bestMove) return;
+
+  // Execute
+  const capIdx = miniState.pieces.findIndex(p => p.square === bestMove && p.color === 'white');
+  if (capIdx >= 0) miniState.pieces.splice(capIdx, 1);
+
+  bestPiece.square = bestMove;
+  miniState.lastAIMoves = [bestMove];
+
+  // Promotion
+  if (bestPiece.type === 'P') {
+    const { rank } = toCoords(bestMove);
+    if (rank === 0) bestPiece.type = 'Q';
+  }
+}
+
+// ——— Pawn Race AI: advance pawns, capture when possible ———
+function pawnRaceAI() {
+  miniState.lastAIMoves = [];
+  const pawns = miniState.pieces.filter(p => p.color === 'black' && p.type === 'P');
+  if (pawns.length === 0) return;
+
+  let bestPawn = null;
+  let bestMove = null;
+  let bestScore = -Infinity;
+
+  for (const pawn of pawns) {
+    const moves = getMiniLegalMoves(pawn);
+
+    for (const move of moves) {
+      let score = 0;
+      const { file: mf, rank: mr } = toCoords(move);
+
+      // Closer to promotion (rank 0) = better
+      score += (7 - mr) * 5;
+
+      // Capture bonus
+      const target = miniState.pieces.find(p => p.square === move && p.color === 'white');
+      if (target) score += 8;
+
+      // Safety: avoid squares attacked by white pawns
+      const threats = miniState.pieces.filter(p =>
+        p.color === 'white' && p.type === 'P' &&
+        Math.abs(toCoords(p.square).file - mf) === 1 &&
+        toCoords(p.square).rank === mr + 1
+      );
+      if (threats.length > 0) score -= 4;
+
+      // Randomness
+      score += Math.random() * 2;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestPawn = pawn;
+        bestMove = move;
+      }
+    }
+  }
+
+  if (!bestPawn || !bestMove) return;
+
+  const capIdx = miniState.pieces.findIndex(p => p.square === bestMove && p.color === 'white');
+  if (capIdx >= 0) miniState.pieces.splice(capIdx, 1);
+
+  bestPawn.square = bestMove;
+  miniState.lastAIMoves = [bestMove];
+}
+
 // ——— Win / Loss / Stalemate detection ———
 function checkMiniWin() {
   switch (miniState.subType) {
@@ -3820,6 +4137,25 @@ function checkMiniWin() {
     case 'checkmate-king': {
       const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
       return bk ? isMiniCheckmate(bk) : false;
+    }
+    case 'battle': {
+      const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+      if (bk) {
+        // Has kings: win by checkmate
+        const inCheck = isMiniInCheck(bk.square, 'black');
+        return inCheck && !hasAnyLegalMoves('black');
+      } else {
+        // No kings: win when all enemy pieces captured
+        return miniState.pieces.filter(p => p.color === 'black').length === 0;
+      }
+    }
+    case 'pawn-race': {
+      // Win: white pawn on rank 7, or all enemy pieces gone
+      if (miniState.pieces.some(p =>
+        p.color === 'white' && p.type === 'P' && toCoords(p.square).rank === 7
+      )) return true;
+      if (!miniState.pieces.some(p => p.color === 'black')) return true;
+      return false;
     }
     default: return false;
   }
@@ -3839,6 +4175,36 @@ function checkMiniLoss() {
       const currentAttackers = miniState.pieces.filter(p => p.color === 'white' && p.type !== 'K').length;
       if (currentAttackers < startAttackers) return 'The enemy king captured your piece! Keep it defended next time 🛡️';
       if (miniState.moveCount >= 50) return '50 moves reached! Try a more efficient approach 🧠';
+      return null;
+    }
+    case 'battle': {
+      const wk = miniState.pieces.find(p => p.color === 'white' && p.type === 'K');
+      if (wk) {
+        // Has kings: check for checkmate or stalemate of player
+        if (!hasAnyLegalMoves('white')) {
+          const inCheck = isMiniInCheck(wk.square, 'white');
+          if (inCheck) return 'Checkmate! The enemy outsmarted you 💪 Try again!';
+          else return 'Stalemate! You got trapped with no legal moves ⚠️';
+        }
+        // Lost all attacking pieces (only king left)
+        const whiteAttackers = miniState.pieces.filter(p => p.color === 'white' && p.type !== 'K');
+        if (whiteAttackers.length === 0) return 'You lost all your attacking pieces! Try to keep them safe 🛡️';
+      } else {
+        // No kings: lost all pieces
+        if (miniState.pieces.filter(p => p.color === 'white').length === 0)
+          return 'All your pieces were captured! 💪';
+      }
+      if (miniState.moveCount >= 80) return '80 moves! Try to be more decisive ⚔️';
+      return null;
+    }
+    case 'pawn-race': {
+      // AI pawn reached rank 0 (promoted)
+      if (miniState.pieces.some(p =>
+        p.color === 'black' && p.type === 'P' && toCoords(p.square).rank === 0
+      )) return 'Enemy pawn promoted first! Race faster next time 🏁';
+      // All player pawns captured
+      if (!miniState.pieces.some(p => p.color === 'white'))
+        return 'All your pawns were captured! 💪';
       return null;
     }
     default: return null;
@@ -3907,6 +4273,16 @@ function isMiniStalemate(bk) {
   }
 
   return true; // stalemate
+}
+
+// General: does a color have ANY legal move? (for checkmate/stalemate detection)
+function hasAnyLegalMoves(color) {
+  const pieces = miniState.pieces.filter(p => p.color === color);
+  for (const piece of pieces) {
+    const moves = getMiniLegalMoves(piece);
+    if (moves.length > 0) return true;
+  }
+  return false;
 }
 
 // ——— Mini-game completion & failure overlays ———
@@ -4036,6 +4412,20 @@ function updateMiniProgress() {
       const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
       const checkText = bk && isMiniInCheck(bk.square, 'black') ? ' · CHECK!' : '';
       text = 'Move ' + miniState.moveCount + checkText;
+      break;
+    }
+    case 'battle': {
+      const whiteCount = miniState.pieces.filter(p => p.color === 'white').length;
+      const blackCount = miniState.pieces.filter(p => p.color === 'black').length;
+      const bk = miniState.pieces.find(p => p.color === 'black' && p.type === 'K');
+      const checkText = bk && isMiniInCheck(bk.square, 'black') ? ' · CHECK!' : '';
+      text = '⚔ ' + whiteCount + ' vs ' + blackCount + ' · Move ' + miniState.moveCount + checkText;
+      break;
+    }
+    case 'pawn-race': {
+      const whitePawns = miniState.pieces.filter(p => p.color === 'white').length;
+      const blackPawns = miniState.pieces.filter(p => p.color === 'black').length;
+      text = '♙ ' + whitePawns + ' vs ' + blackPawns + ' ♟ · Move ' + miniState.moveCount;
       break;
     }
   }
