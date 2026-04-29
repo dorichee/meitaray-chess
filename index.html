@@ -858,6 +858,30 @@ html, body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
+
+/* ============================================================
+   STRATEGY TIPS
+   ============================================================ */
+.game-instruction.tip-active {
+  color: #92400e;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 12px;
+  padding: 10px 16px;
+  animation: tip-flash 0.3s ease;
+  box-shadow: 0 2px 10px rgba(251, 191, 36, 0.2);
+}
+
+.game-instruction .tip-counter {
+  display: block;
+  font-size: 11px;
+  color: rgba(146, 64, 14, 0.5);
+  margin-top: 4px;
+}
+
+@keyframes tip-flash {
+  0% { transform: scale(0.95); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
 </style>
 </head>
 
@@ -1308,6 +1332,10 @@ const LEVELS = [
       { square: 'h8', type: 'R' }
     ],
     instruction: 'A pin traps a piece on a line! Your bishop is staring down a diagonal — one enemy piece is stuck because the KING is right behind it. If it moves, the king is exposed! Tap the pinned piece 📌',
+    strategyTips: [
+      '📌 A pin happens when a piece is stuck on a line between YOUR attacker and something valuable behind it',
+      '👀 Look along the bishop\'s diagonal — which enemy has the KING hiding behind it?'
+    ],
     theme: '#dc2626'
   },
   {
@@ -1370,6 +1398,10 @@ const LEVELS = [
       { square: 'h6', type: 'B' }
     ],
     instruction: 'A skewer is like a REVERSE pin! You attack a valuable piece, it HAS to move, and then you capture the weaker piece hiding behind it. Move your rook to the right square on the d-file to skewer the king to the pawn! 🗡️',
+    strategyTips: [
+      '🗡️ A skewer is like a reverse pin — attack a BIG piece, force it to move, take what\'s behind it!',
+      '👀 Look for a line where the king and a weaker piece sit — your rook needs to get on that line'
+    ],
     theme: '#0891b2'
   },
   {
@@ -1430,6 +1462,10 @@ const LEVELS = [
       { square: 'a3', type: 'B' }
     ],
     instruction: 'A discovered attack is sneaky! Your knight is blocking the rook\'s view. When the knight jumps away, the rook reveals an attack on an enemy piece! Tap the enemy that\'s about to be in danger 💥',
+    strategyTips: [
+      '💥 Discovered attack = one piece moves out of the way, revealing an attack from the piece BEHIND it',
+      '👀 Look at the rook\'s file — what enemy piece would it attack if the knight weren\'t in the way?'
+    ],
     theme: '#7c3aed'
   },
   {
@@ -1822,6 +1858,10 @@ const LEVELS = [
     move2: 'e8',
     instruction: 'Checkmate in 2! Give check first ♚',
     instruction2: 'The queen was captured — now deliver checkmate! ♚♚',
+    strategyTips: [
+      '🧠 Think TWO moves ahead — give check first, then see where the king goes',
+      '♚ After your check, the opponent MUST respond — predict their move, then strike!'
+    ],
     theme: '#dc2626'
   },
   {
@@ -2033,7 +2073,106 @@ const LEVELS = [
     ],
     starThresholds: [12, 20],
     instruction: 'Corner the enemy king and deliver CHECKMATE! Tap a piece, then tap where to move it 👑🏆',
+    strategyTips: [
+      '🧱 Use the queen as a WALL — cut off one row at a time to shrink the king\'s space',
+      '👑 Bring your KING closer! The queen can\'t checkmate alone — your king must help trap the enemy',
+      '⬅️ Push the enemy king toward the EDGE — checkmate only works near the border of the board',
+      '⚠️ Don\'t check too early! Use the queen to CUT OFF rows, not chase the king around',
+      '🚫 Watch for STALEMATE — always leave the enemy king a square to move... until the final checkmate'
+    ],
     theme: '#059669'
+  },
+  {
+    id: 59,
+    name: 'Rook Roller',
+    type: 'mini-game',
+    subType: 'checkmate-king',
+    phase: 7,
+    mapIcon: '🏰',
+    startPieces: [
+      { type: 'K', square: 'e1', color: 'white' },
+      { type: 'R', square: 'a1', color: 'white' },
+      { type: 'R', square: 'h1', color: 'white' },
+      { type: 'K', square: 'd5', color: 'black' }
+    ],
+    starThresholds: [10, 18],
+    instruction: 'Checkmate with TWO ROOKS! Use them like a ladder to push the king to the edge 🏰🏰',
+    strategyTips: [
+      '🪜 The "rook ladder" — one rook cuts off a rank, the other checks from the next rank',
+      '⬆️ Push the king to the edge ONE ROW at a time — be patient!',
+      '🛡️ Keep your rooks FAR from the enemy king so they can\'t be captured',
+      '🎯 Once the king is on the edge, one rook checks and the other blocks escape'
+    ],
+    theme: '#6366f1'
+  },
+  {
+    id: 60,
+    name: 'Knight Sweep',
+    type: 'mini-game',
+    subType: 'queen-sweep',
+    phase: 7,
+    mapIcon: '🐴',
+    startPieces: [
+      { type: 'N', square: 'd4', color: 'white' },
+      { type: 'P', square: 'b7', color: 'black' },
+      { type: 'P', square: 'f7', color: 'black' },
+      { type: 'P', square: 'g3', color: 'black' },
+      { type: 'P', square: 'b2', color: 'black' },
+      { type: 'P', square: 'h6', color: 'black' }
+    ],
+    starThresholds: [8, 12],
+    instruction: 'Clear the board with your knight! Plan your L-shaped jumps carefully 🐴⚔️',
+    strategyTips: [
+      '🐴 Knights move in L-shapes — picture the route before you jump!',
+      '🗺️ Capture the CLOSEST target first, then work your way across the board'
+    ],
+    theme: '#8b5cf6'
+  },
+  {
+    id: 61,
+    name: 'Rook Defense',
+    type: 'mini-game',
+    subType: 'pawn-hunter',
+    phase: 7,
+    mapIcon: '🛡️',
+    startPieces: [
+      { type: 'R', square: 'd1', color: 'white' },
+      { type: 'P', square: 'a7', color: 'black' },
+      { type: 'P', square: 'c7', color: 'black' },
+      { type: 'P', square: 'e7', color: 'black' },
+      { type: 'P', square: 'g7', color: 'black' },
+      { type: 'P', square: 'h6', color: 'black' }
+    ],
+    starThresholds: [7, 12],
+    instruction: 'Stop ALL 5 pawns with your rook! Slide across ranks to intercept them 🏰🛡️',
+    strategyTips: [
+      '🏰 Rooks are powerful across RANKS — slide sideways to sweep up multiple pawns',
+      '🎯 Prioritize the pawn closest to the bottom — that one promotes first!'
+    ],
+    theme: '#ef4444'
+  },
+  {
+    id: 62,
+    name: 'Bishop Sniper',
+    type: 'mini-game',
+    subType: 'queen-sweep',
+    phase: 7,
+    mapIcon: '🎯',
+    startPieces: [
+      { type: 'B', square: 'a1', color: 'white' },
+      { type: 'P', square: 'c3', color: 'black' },
+      { type: 'P', square: 'f6', color: 'black' },
+      { type: 'P', square: 'e5', color: 'black' },
+      { type: 'P', square: 'g3', color: 'black' },
+      { type: 'P', square: 'd8', color: 'black' }
+    ],
+    starThresholds: [6, 10],
+    instruction: 'Snipe all enemies with your bishop! Use those long diagonals 🎯',
+    strategyTips: [
+      '↗️ Bishops move DIAGONALLY — plan a zigzag path across the board',
+      '⚡ Bishops are fast on open boards — use long diagonal sweeps to cover ground quickly'
+    ],
+    theme: '#10b981'
   }
 ];
 
@@ -2063,6 +2202,8 @@ let gameActive = false;     // prevents taps after level complete
 let mateStep = 0;           // 0 = not mate-in-2, 1 = step 1, 2 = step 2
 let mateStep2Level = null;  // computed step 2 level data for checkmate-in-2
 let miniState = null;       // mini-game state: { pieces, turn, selected, legalMoves, moveCount, ... }
+let currentTipIndex = 0;    // cycles through strategyTips on hint press
+let currentTipTimeout = null;
 
 
 /* =============================================================
@@ -2836,10 +2977,14 @@ function startLevel(levelId) {
   gameActive = true;
   mateStep = level.type === 'checkmate-in-2' ? 1 : 0;
   mateStep2Level = null;
+  currentTipIndex = 0;
+  if (currentTipTimeout) clearTimeout(currentTipTimeout);
 
   // Update header
   document.getElementById('game-level-name').textContent = level.name;
-  document.getElementById('game-instruction').textContent = level.instruction;
+  const instr = document.getElementById('game-instruction');
+  instr.textContent = level.instruction;
+  instr.classList.remove('tip-active');
 
   // Render board
   renderBoard(level);
@@ -3070,7 +3215,29 @@ function handleSquareTap(sq, el) {
 function showHint() {
   if (!gameActive) return;
 
-  // Mini-games: no hints, show encouragement
+  const level = LEVELS[currentLevelId - 1];
+
+  // Levels with strategy tips: cycle through them
+  if (level.strategyTips && level.strategyTips.length > 0) {
+    sfxHint();
+    const instr = document.getElementById('game-instruction');
+    const tips = level.strategyTips;
+    const idx = currentTipIndex % tips.length;
+
+    instr.innerHTML = tips[idx] + '<span class="tip-counter">💡 Tip ' + (idx + 1) + ' of ' + tips.length + '</span>';
+    instr.classList.add('tip-active');
+
+    currentTipIndex++;
+
+    if (currentTipTimeout) clearTimeout(currentTipTimeout);
+    currentTipTimeout = setTimeout(() => {
+      instr.textContent = level.instruction;
+      instr.classList.remove('tip-active');
+    }, 6000);
+    return;
+  }
+
+  // Mini-games without tips: generic encouragement
   if (miniState) {
     sfxHint();
     const instr = document.getElementById('game-instruction');
@@ -3080,6 +3247,7 @@ function showHint() {
     return;
   }
 
+  // Regular puzzle levels: highlight a correct square
   const remaining = correctSquares.filter(sq => !foundSquares.includes(sq));
   if (remaining.length === 0) return;
 
@@ -3194,6 +3362,7 @@ function exitGame() {
   hideOverlay();
   gameActive = false;
   miniState = null;
+  if (currentTipTimeout) clearTimeout(currentTipTimeout);
   showScreen('map');
 }
 
@@ -3253,9 +3422,25 @@ function startMiniGame(level) {
   gameActive = true;
   mistakes = 0;
   currentLevelId = level.id;
+  currentTipIndex = 0;
+  if (currentTipTimeout) clearTimeout(currentTipTimeout);
 
   document.getElementById('game-level-name').textContent = level.name;
-  document.getElementById('game-instruction').textContent = level.instruction;
+
+  // Show first strategy tip automatically on start, or fall back to instruction
+  const instr = document.getElementById('game-instruction');
+  if (level.strategyTips && level.strategyTips.length > 0) {
+    instr.innerHTML = level.strategyTips[0] + '<span class="tip-counter">💡 Tip 1 of ' + level.strategyTips.length + ' — tap 💡 for more</span>';
+    instr.classList.add('tip-active');
+    currentTipIndex = 1;
+    currentTipTimeout = setTimeout(() => {
+      instr.textContent = level.instruction;
+      instr.classList.remove('tip-active');
+    }, 7000);
+  } else {
+    instr.textContent = level.instruction;
+    instr.classList.remove('tip-active');
+  }
 
   renderMiniGameBoard();
   updateMiniProgress();
@@ -3554,17 +3739,34 @@ function checkmateKingAI() {
 
   if (moves.length === 0) return; // checkmate or stalemate — handled elsewhere
 
-  // Always capture undefended queen if possible
-  const wq = miniState.pieces.find(p => p.color === 'white' && p.type === 'Q');
-  if (wq && moves.includes(wq.square)) {
-    if (wk) {
-      const { file: wkf, rank: wkr } = toCoords(wk.square);
-      const { file: qf, rank: qr } = toCoords(wq.square);
-      const defended = Math.abs(wkf - qf) <= 1 && Math.abs(wkr - qr) <= 1;
+  // Always capture undefended attacking piece if possible (queen or rooks)
+  const attackers = miniState.pieces.filter(p => p.color === 'white' && p.type !== 'K');
+  for (const attacker of attackers) {
+    if (moves.includes(attacker.square)) {
+      // Check if defended by white king
+      let defended = false;
+      if (wk) {
+        const { file: wkf, rank: wkr } = toCoords(wk.square);
+        const { file: af, rank: ar } = toCoords(attacker.square);
+        defended = Math.abs(wkf - af) <= 1 && Math.abs(wkr - ar) <= 1;
+      }
+      // Also check if defended by another attacker
       if (!defended) {
-        miniState.pieces = miniState.pieces.filter(p => p !== wq);
-        bk.square = wq.square;
-        miniState.lastAIMoves = [wq.square];
+        for (const other of attackers) {
+          if (other === attacker) continue;
+          const occ2 = {};
+          for (const p of miniState.pieces) {
+            if (p === other) continue;
+            occ2[p.square] = p.color === other.color ? 'friendly' : 'enemy';
+          }
+          const otherMoves = getMovesForPiece(other.type, other.square, occ2);
+          if (otherMoves.includes(attacker.square)) { defended = true; break; }
+        }
+      }
+      if (!defended) {
+        miniState.pieces = miniState.pieces.filter(p => p !== attacker);
+        bk.square = attacker.square;
+        miniState.lastAIMoves = [attacker.square];
         return;
       }
     }
@@ -3581,10 +3783,10 @@ function checkmateKingAI() {
     // Prefer center
     score -= (Math.abs(mf - 3.5) + Math.abs(mr - 3.5)) * 0.8;
 
-    // Stay away from queen
-    if (wq) {
-      const { file: qf, rank: qr } = toCoords(wq.square);
-      score += (Math.abs(mf - qf) + Math.abs(mr - qr)) * 0.3;
+    // Stay away from attacking pieces (queen, rooks)
+    for (const attacker of attackers) {
+      const { file: af, rank: ar } = toCoords(attacker.square);
+      score += (Math.abs(mf - af) + Math.abs(mr - ar)) * 0.3;
     }
 
     // Stay away from white king
@@ -3632,8 +3834,10 @@ function checkMiniLoss() {
       return promoted ? 'A pawn got through! Try again 💪' : null;
     }
     case 'checkmate-king': {
-      const hasQueen = miniState.pieces.some(p => p.color === 'white' && p.type === 'Q');
-      if (!hasQueen) return 'The enemy king captured your queen! Keep her defended next time 🛡️';
+      const startLevel = LEVELS[miniState.levelId - 1];
+      const startAttackers = startLevel.startPieces.filter(p => p.color === 'white' && p.type !== 'K').length;
+      const currentAttackers = miniState.pieces.filter(p => p.color === 'white' && p.type !== 'K').length;
+      if (currentAttackers < startAttackers) return 'The enemy king captured your piece! Keep it defended next time 🛡️';
       if (miniState.moveCount >= 50) return '50 moves reached! Try a more efficient approach 🧠';
       return null;
     }
