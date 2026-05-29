@@ -3006,6 +3006,7 @@ function getMaxStars() {
 }
 
 function isLevelUnlocked(levelId, player) {
+  if (player === 'dori') return true; // testing profile — every level unlocked & playable
   if (levelId === 1) return true;
   return gameData[player].stars[levelId - 2] > 0; // previous level completed
 }
