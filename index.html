@@ -140,6 +140,10 @@ html, body {
   background: linear-gradient(145deg, #38bdf8, #0ea5e9, #0284c7);
   box-shadow: 0 10px 40px rgba(14, 165, 233, 0.4);
 }
+.player-card.dori {
+  background: linear-gradient(145deg, #34d399, #10b981, #059669);
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+}
 
 .player-icon {
   font-size: 72px;
@@ -893,7 +897,7 @@ html, body {
        SCREEN: PLAYER SELECT
        ============================================================ -->
   <div id="screen-select" class="screen active">
-    <h1 class="app-title"><span class="crown">♟</span> MeitaRay Chess</h1>
+    <h1 class="app-title"><span class="crown" id="secret-crown" onclick="secretTap()">♟</span> MeitaRay Chess</h1>
     <p class="app-subtitle">Choose your player</p>
     <div class="player-cards">
       <button class="player-card ray" onclick="selectPlayer('ray')">
@@ -905,6 +909,11 @@ html, body {
         <div class="player-icon">♞</div>
         <div class="player-name">Meitar</div>
         <div class="player-stars-display" id="meitar-total-stars">⭐ 0</div>
+      </button>
+      <button class="player-card dori" id="dori-card" style="display:none" onclick="selectPlayer('dori')">
+        <div class="player-icon">♚</div>
+        <div class="player-name">Dori</div>
+        <div class="player-stars-display" id="dori-total-stars">⭐ 0</div>
       </button>
     </div>
     <p class="abba-credit">Made by Abba, with love ❤️</p>
@@ -1834,14 +1843,15 @@ const LEVELS = [
      ============================================================= */
   {
     // Qe8+ Qxe8 Rxe8# — Queen sacrifice, rook recaptures on back rank
+    // (Q must be in front of R on e-file so its path to e8 is clear)
     id: 49,
     name: 'Royal Trap',
     type: 'checkmate-in-2',
     phase: 6,
-    piece: { type: 'Q', square: 'e1' },
-    piece2: { type: 'R', square: 'e2' },
+    piece: { type: 'Q', square: 'e2' },
+    piece2: { type: 'R', square: 'e1' },
     friendlies: [
-      { type: 'R', square: 'e2' },
+      { type: 'R', square: 'e1' },
       { type: 'K', square: 'g1' }
     ],
     blockers: [
@@ -1866,6 +1876,7 @@ const LEVELS = [
   },
   {
     // Re8+ Kh7 Qxg7# — Rook check forces king to corner, queen mates
+    // (Knight on h5 defends g7 so king can't capture queen)
     id: 50,
     name: 'Corner Hunt',
     type: 'checkmate-in-2',
@@ -1874,6 +1885,7 @@ const LEVELS = [
     piece2: { type: 'Q', square: 'b2' },
     friendlies: [
       { type: 'Q', square: 'b2' },
+      { type: 'N', square: 'h5' },
       { type: 'K', square: 'a1' }
     ],
     blockers: [
@@ -1891,7 +1903,8 @@ const LEVELS = [
     theme: '#dc2626'
   },
   {
-    // Re8+ Kh7 Qf5# — Rook check, queen diagonal mate with knight guarding
+    // Re8+ Kh7 Qh6# — Rook check, queen mates adjacent (defended by knight)
+    // (Qf5 was blockable by ...g6; Qh6 is adjacent to king, no blocking square)
     id: 51,
     name: 'Nowhere to Hide',
     type: 'checkmate-in-2',
@@ -1912,13 +1925,14 @@ const LEVELS = [
     opponentFrom: 'g8',
     opponentTo: 'h7',
     opponentCaptures: false,
-    move2: 'f5',
+    move2: 'h6',
     instruction: 'Checkmate in 2! Give check first ♚',
     instruction2: 'The king ran — now deliver checkmate! ♚♚',
     theme: '#dc2626'
   },
   {
     // Qxh7+ Kf8 Ra8# — Queen takes h-pawn, rook swoops to back rank
+    // (Bishop on c2 defends h7 so king can't capture the queen)
     id: 52,
     name: "Queen's Gambit",
     type: 'checkmate-in-2',
@@ -1927,6 +1941,7 @@ const LEVELS = [
     piece2: { type: 'R', square: 'a1' },
     friendlies: [
       { type: 'R', square: 'a1' },
+      { type: 'B', square: 'c2' },
       { type: 'N', square: 'd5' },
       { type: 'K', square: 'g1' }
     ],
@@ -1975,31 +1990,32 @@ const LEVELS = [
     theme: '#dc2626'
   },
   {
-    // Qxh7+ Kf8 Rxe8# — Queen takes h-pawn, rook captures queen for mate
+    // Rd8+ Rxd8 Qxd8# — Rook lures the defender, queen recaptures and mates
+    // (Mirror of L53: rook sacrifices first, queen does the killing blow)
     id: 54,
     name: 'Final Checkmate',
     type: 'checkmate-in-2',
     phase: 6,
-    piece: { type: 'Q', square: 'h5' },
-    piece2: { type: 'R', square: 'e2' },
+    piece: { type: 'R', square: 'd1' },
+    piece2: { type: 'Q', square: 'h4' },
     friendlies: [
-      { type: 'R', square: 'e2' },
+      { type: 'Q', square: 'h4' },
       { type: 'K', square: 'g1' }
     ],
     blockers: [
       { square: 'g8', type: 'K' },
-      { square: 'e8', type: 'Q' },
+      { square: 'a8', type: 'R' },
       { square: 'f7', type: 'P' },
       { square: 'g7', type: 'P' },
       { square: 'h7', type: 'P' }
     ],
-    move1: 'h7',
-    opponentFrom: 'g8',
-    opponentTo: 'f8',
-    opponentCaptures: false,
-    move2: 'e8',
+    move1: 'd8',
+    opponentFrom: 'a8',
+    opponentTo: 'd8',
+    opponentCaptures: true,
+    move2: 'd8',
     instruction: 'Checkmate in 2! Give check first ♚',
-    instruction2: 'The king ran — now deliver checkmate! ♚♚',
+    instruction2: 'The rook was captured — now deliver checkmate! ♚♚',
     theme: '#dc2626'
   },
 
@@ -2323,8 +2339,8 @@ const STAR_MESSAGES = {
 /* =============================================================
    GAME STATE
    ============================================================= */
-let currentPlayer = null;   // 'ray' or 'meitar'
-let gameData = null;        // { ray: { stars: [...] }, meitar: { stars: [...] } }
+let currentPlayer = null;   // 'ray', 'meitar', or 'dori'
+let gameData = null;        // { ray: { stars: [...] }, meitar: {...}, dori: {...} }
 let currentLevelId = null;
 let correctSquares = [];    // squares the player needs to find
 let foundSquares = [];      // squares already found
@@ -2878,23 +2894,69 @@ function getStep2Level(level) {
   };
 }
 
-function transitionToMateStep2() {
-  const level = LEVELS[currentLevelId - 1];
-  mateStep = 2;
+// Animate a piece sliding from one square to another. Returns a Promise.
+// The piece element is moved via CSS transform; DOM position stays put
+// (the next renderBoard call will rebuild the board fresh anyway).
+function animatePieceSlide(fromSq, toSq, durationMs) {
+  return new Promise(resolve => {
+    const fromEl = document.querySelector(`.square[data-square="${fromSq}"]`);
+    const toEl = document.querySelector(`.square[data-square="${toSq}"]`);
+    if (!fromEl || !toEl) { resolve(null); return; }
+    // Pick the actual moving piece (skip value badges etc.)
+    const pieceEl = fromEl.querySelector('.piece');
+    if (!pieceEl) { resolve(null); return; }
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    const dx = toRect.left - fromRect.left;
+    const dy = toRect.top - fromRect.top;
+    pieceEl.style.transition = `transform ${durationMs}ms cubic-bezier(.4,.0,.2,1)`;
+    pieceEl.style.zIndex = '10';
+    pieceEl.style.transform = `translate(${dx}px, ${dy}px)`;
+    setTimeout(() => resolve(pieceEl), durationMs + 30);
+  });
+}
 
-  // Compute step 2 position
+function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function transitionToMateStep2() {
+  const level = LEVELS[currentLevelId - 1];
+
+  // Step 1 animation: kid's piece slides from its origin to move1.
+  // We hide the candidate dot during the animation so the eye follows the piece.
+  document.querySelectorAll('.square.candidate').forEach(el => el.classList.remove('candidate'));
+  const movedPiece = await animatePieceSlide(level.piece.square, level.move1, 450);
+
+  // Tiny pause so the kid registers the position
+  await _sleep(220);
+
+  // If the opponent captures, fade out the kid's piece on move1 BEFORE
+  // the opponent slides on top of it.
+  if (level.opponentCaptures && movedPiece) {
+    movedPiece.style.transition = 'opacity 220ms ease-out';
+    movedPiece.style.opacity = '0';
+    await _sleep(180);
+  }
+
+  // Step 1.5 animation: opponent's response slides from opponentFrom → opponentTo
+  if (level.opponentFrom && level.opponentTo) {
+    await animatePieceSlide(level.opponentFrom, level.opponentTo, 400);
+  }
+
+  // Brief pause so the kid sees the new position before step 2 takes over
+  await _sleep(280);
+
+  // Now flip into step 2
+  mateStep = 2;
   mateStep2Level = getStep2Level(level);
 
-  // Reset for step 2
   correctSquares = [level.move2];
   foundSquares = [];
   gameActive = true;
 
-  // Update instruction
   document.getElementById('game-instruction').textContent =
     level.instruction2 || 'Now deliver checkmate! ♚♚';
 
-  // Re-render the board with step 2 position
+  // Re-render the board with step 2 position (this also clears any lingering transforms)
   renderBoard(mateStep2Level);
 
   // Update progress
@@ -2913,7 +2975,7 @@ function loadData() {
     if (raw) {
       const data = JSON.parse(raw);
       // Ensure arrays are correct length
-      for (const player of ['ray', 'meitar']) {
+      for (const player of ['ray', 'meitar', 'dori']) {
         if (!data[player]) data[player] = { stars: [] };
         while (data[player].stars.length < LEVELS.length) {
           data[player].stars.push(0);
@@ -2924,7 +2986,8 @@ function loadData() {
   } catch(e) {}
   return {
     ray: { stars: new Array(LEVELS.length).fill(0) },
-    meitar: { stars: new Array(LEVELS.length).fill(0) }
+    meitar: { stars: new Array(LEVELS.length).fill(0) },
+    dori: { stars: new Array(LEVELS.length).fill(0) }
   };
 }
 
@@ -2967,10 +3030,11 @@ function showScreen(id) {
 function updateSelectScreen() {
   document.getElementById('ray-total-stars').textContent = '⭐ ' + getTotalStars('ray');
   document.getElementById('meitar-total-stars').textContent = '⭐ ' + getTotalStars('meitar');
+  document.getElementById('dori-total-stars').textContent = '⭐ ' + getTotalStars('dori');
 }
 
 function updateMapScreen() {
-  const name = currentPlayer === 'ray' ? 'Ray' : 'Meitar';
+  const name = { ray: 'Ray', meitar: 'Meitar', dori: 'Dori' }[currentPlayer] || 'Player';
   document.getElementById('map-player-name').textContent = name + "'s Levels";
   document.getElementById('map-total-stars').textContent =
     '⭐ ' + getTotalStars(currentPlayer) + ' / ' + getMaxStars();
@@ -2984,6 +3048,27 @@ function updateMapScreen() {
 function selectPlayer(player) {
   currentPlayer = player;
   showScreen('map');
+}
+
+/* Secret unlock: tap the title crown 5 times (within 3s of each tap) to
+   reveal Dori's hidden testing profile. Kid-proof — they won't stumble on it. */
+let _secretTaps = 0;
+let _secretTimer = null;
+function secretTap() {
+  _secretTaps++;
+  clearTimeout(_secretTimer);
+  _secretTimer = setTimeout(() => { _secretTaps = 0; }, 3000);
+  if (_secretTaps >= 5) {
+    _secretTaps = 0;
+    const card = document.getElementById('dori-card');
+    if (card) {
+      card.style.display = 'flex';
+      card.animate(
+        [{ transform: 'scale(0.6)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }],
+        { duration: 350, easing: 'ease-out' }
+      );
+    }
+  }
 }
 
 
@@ -3316,6 +3401,16 @@ function handleSquareTap(sq, el) {
     el.classList.add('correct');
     sfxCorrect();
 
+    // For mate step 2, slide the kid's piece to the mating square so the
+    // mating move is VISIBLE (kills the "pieces switched" feeling)
+    const isMateStep2Final =
+      originalLevel.type === 'checkmate-in-2' &&
+      mateStep === 2 &&
+      foundSquares.length === correctSquares.length;
+    if (isMateStep2Final) {
+      animatePieceSlide(level.piece.square, sq, 400);
+    }
+
     // If this square had a blocker/enemy piece, fade it out (captured!)
     const pieceEl = el.querySelector('.blocker-piece, .enemy-piece');
     if (pieceEl) {
@@ -3330,11 +3425,13 @@ function handleSquareTap(sq, el) {
       // Mate-in-2: transition from step 1 → step 2
       if (originalLevel.type === 'checkmate-in-2' && mateStep === 1) {
         gameActive = false;
-        setTimeout(() => transitionToMateStep2(), 800);
+        // Short pause so sfxCorrect lands, then animate kid's piece sliding in
+        setTimeout(() => transitionToMateStep2(), 200);
         return;
       }
       gameActive = false;
-      setTimeout(() => completeLevel(), 600);
+      // Mate step 2 needs slightly longer so the slide finishes before the celebration
+      setTimeout(() => completeLevel(), isMateStep2Final ? 700 : 600);
     }
   } else {
     // WRONG
